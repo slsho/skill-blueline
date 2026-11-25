@@ -8,7 +8,7 @@
  },
  "people": {
   "dana": "Dana Whitfield",
-  "marcus": "Marcus Lee",
+  "max": "Max Lee",
   "priya": "Priya Natarajan",
   "tom": "Tom Becker",
   "owner": "Deck owner"
@@ -131,7 +131,7 @@
    "slide": 1,
    "kind": "change",
    "where": "Slide 1",
-   "who": "marcus",
+   "who": "max",
    "comment": "Cover is all text. Could we put a simple ring map graphic on the right? Light lines, nothing loud.",
    "change": "Added the ring map to the right side of the cover, in thin grey lines.",
    "why": "No orange, because the small label above the title already uses it. Dana's comment on this slide is probably about the same thing.",
@@ -152,8 +152,8 @@
    "who": "dana",
    "image": "before-01",
    "comment": "Hmm, not loving the cover. Can we rethink?",
-   "why": "Too vague to redesign from. Marcus's comment on the same slide is the likeliest reason, so Claude asks first.",
-   "reply": "Is it that the cover is all text? Marcus suggested adding a ring map graphic. Want me to try that, or is it something else, like the title?"
+   "why": "Too vague to redesign from. Max's comment on the same slide is the likeliest reason, so Claude asks first.",
+   "reply": "Is it that the cover is all text? Max suggested adding a ring map graphic. Want me to try that, or is it something else, like the title?"
   },
   {
    "id": 14,
@@ -368,7 +368,7 @@
    "slide": 14,
    "kind": "reply",
    "where": "Slide 14",
-   "who": "marcus",
+   "who": "max",
    "image": "before-14",
    "comment": "Change the \"!\" circle to red so it reads as a warning.",
    "why": "Red isn't in the Signal palette, and the legend on this slide already defines the orange \"!\" as a pain point. Adding red would change every deck that uses the system.",

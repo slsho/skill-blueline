@@ -24,7 +24,7 @@ def strings(obj):
 class Cards(unittest.TestCase):
     def test_the_trimmed_round(self):
         self.assertEqual(sorted(c["id"] for c in CARDS), [1, 2, 4, 5, 8, 10, 14])
-        self.assertEqual({c["who"] for c in CARDS} - {"owner"}, {"dana", "marcus", "priya", "tom"}, "all four reviewers")
+        self.assertEqual({c["who"] for c in CARDS} - {"owner"}, {"dana", "max", "priya", "tom"}, "all four reviewers")
 
     def test_ids_unique_and_kinds_known(self):
         ids = [c["id"] for c in CARDS]
