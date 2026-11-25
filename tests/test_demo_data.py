@@ -177,7 +177,7 @@ class Page(unittest.TestCase):
 
     def test_blue_dashes_only_mark_changes_on_the_slide(self):
         html = (SKILL / "app" / "index.html").read_text()
-        dashed = [l.split("{")[0].strip() for l in html.splitlines() if "dashed var(--pencil)" in l]
+        dashed = [l.split("{")[0].strip() for l in html.splitlines() if "dashed var(--bl-change)" in l]
         self.assertEqual(dashed, [".stage .hl", ".six .hl"])
 
     def test_every_decision_goes_to_the_server_when_live(self):

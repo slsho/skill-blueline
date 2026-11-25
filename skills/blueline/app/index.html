@@ -4,407 +4,435 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Blueline review</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Crect width='20' height='20' rx='5' fill='%230A0A0A'/%3E%3Cpath d='M4.5 5.5h11v7.5h-6l-3.5 2.5v-2.5h-1.5z' fill='none' stroke='%234C8DFF' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Crect width='20' height='20' rx='5' fill='%23111111'/%3E%3Cpath d='M4.5 5.5h11v7.5h-6l-3.5 2.5v-2.5h-1.5z' fill='none' stroke='%233f81ea' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap">
 <style>
-/* v3: the slide fills the screen, one comment at a time. Scroll down for the next comment.
-   The sidebar holds that comment, Claude's change, Edit / Not quite, and the approve panel at the bottom. */
-/* Dark only, in the style of a portfolio "feedback mode": black canvas in a rounded window,
-   a flat grey comments panel, one blue for links and focus; blue dashes only for what changed on the slide. One sans throughout. */
+/* The slide fills the screen, one stop per slide; scroll down for the next. The sidebar holds that slide's
+   comments, Claude's change for the open one, and the approve panel at the bottom. */
+/* Built on Figma's Simple Design System (SDS), Dark mode: every colour, space, corner, stroke, type size and
+   weight is an SDS token (references/sds-tokens.json). Blue is SDS's Blue ramp and means one thing only:
+   "this changed on the slide". scripts/check_design_system.py fails on anything that isn't a token. */
+:root {
+  color-scheme: dark;
+  /* SDS colour, Dark mode */
+  --sds-color-background-default-default: #1e1e1e;
+  --sds-color-background-default-default-hover: #383838;
+  --sds-color-background-default-secondary: #2c2c2c;
+  --sds-color-background-default-tertiary: #444444;
+  --sds-color-background-neutral-secondary: #303030;
+  --sds-color-background-neutral-tertiary: #303030;
+  --sds-color-background-neutral-tertiary-hover: #242424;
+  --sds-color-background-brand-default: #f5f5f5;
+  --sds-color-background-brand-hover: #d9d9d9;
+  --sds-color-background-brand-secondary: #444444;
+  --sds-color-background-positive-default: #008043;
+  --sds-color-background-warning-default: #e8b931;
+  --sds-color-background-disabled-default: #383838;
+  --sds-color-text-default-default: #ffffff;
+  --sds-color-text-default-secondary: #ffffffb2;
+  --sds-color-text-default-tertiary: #ffffff66;
+  --sds-color-text-brand-on-brand: #1e1e1e;
+  --sds-color-text-positive-secondary: #85e0a3;
+  --sds-color-text-warning-secondary: #e8b931;
+  --sds-color-border-default-default: #444444;
+  --sds-color-border-default-secondary: #757575;
+  --sds-color-border-neutral-secondary: #949494;
+  --sds-color-border-brand-default: #f5f5f5;
+  --sds-color-border-positive-secondary: #85e0a3;
+  --sds-color-icon-default-default: #ffffff;
+  --sds-color-icon-default-secondary: #ffffffb2;
+  --sds-color-icon-brand-on-brand: #1e1e1e;
+  --sds-color-icon-positive-on-positive: #ebffee;
+  --sds-color-icon-disabled-default: #757575;
+  /* SDS colour primitives: the slide well, slide paper, shadow, the change blue, and avatar colours */
+  --sds-color-gray-1000: #111111;
+  --sds-color-white-1000: #ffffff;
+  --sds-color-black-400: #0c0c0d66;
+  --sds-color-blue-400: #9ebef1;
+  --sds-color-blue-500: #3f81ea;
+  --sds-color-blue-900: #183057;
+  --sds-color-slate-700: #5a5a5a;
+  --sds-color-yellow-700: #975102;
+  --sds-color-green-700: #008043;
+  --sds-color-pink-700: #ba2a92;
+  --sds-color-pink-900: #57184a;
+  /* SDS size */
+  --sds-size-space-050: 2px;
+  --sds-size-space-100: 4px;
+  --sds-size-space-150: 6px;
+  --sds-size-space-200: 8px;
+  --sds-size-space-300: 12px;
+  --sds-size-space-400: 16px;
+  --sds-size-space-600: 24px;
+  --sds-size-space-800: 32px;
+  --sds-size-space-1200: 48px;
+  --sds-size-space-1600: 64px;
+  --sds-size-space-2400: 96px;
+  --sds-size-radius-100: 4px;
+  --sds-size-radius-200: 8px;
+  --sds-size-radius-400: 16px;
+  --sds-size-radius-full: 9999px;
+  --sds-size-stroke-border: 1px;
+  --sds-size-stroke-focus-ring: 2px;
+  /* SDS typography */
+  --sds-typography-body-font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sds-typography-body-size-small: 14px;
+  --sds-typography-body-size-medium: 16px;
+  --sds-typography-body-font-weight-regular: 400;
+  --sds-typography-body-font-weight-strong: 600;
+  --sds-typography-scale-01: 12px;
+  --sds-typography-heading-size-small: 20px;
+  --sds-typography-heading-font-weight: 600;
+  /* SDS effect style */
+  --sds-effects-drop-shadow-600: 0 16px 32px -8px var(--sds-color-black-400);
+  /* Blueline's names for SDS tokens (built from the tokens above only) */
+  --bl-ring: 0 0 0 var(--sds-size-stroke-border) var(--sds-color-border-default-default);
+  --bl-ring-selected: 0 0 0 var(--sds-size-stroke-focus-ring) var(--sds-color-border-brand-default);
+  --bl-change: var(--sds-color-blue-500);
+  --bl-change-text: var(--sds-color-blue-400);
+  --bl-change-wash: var(--sds-color-blue-900);
+  --bl-text-small: var(--sds-typography-body-font-weight-regular) var(--sds-typography-body-size-small)/1.4 var(--sds-typography-body-font-family);
+  --bl-text-body: var(--sds-typography-body-font-weight-regular) var(--sds-typography-body-size-medium)/1.4 var(--sds-typography-body-font-family);
+}
 *, *::before, *::after { box-sizing: border-box; }
 html, body { height: 100%; }
 h1, h2, h3, p { margin: 0; }
 button, textarea { font: inherit; color: inherit; }
-:focus-visible { outline: 2px solid var(--pencil); outline-offset: 3px; border-radius: 3px; }
-/* ---------- frame ---------- */
-.top { grid-column: 1 / -1; display: flex; align-items: center; gap: 16px; padding: 10px 20px; border-bottom: 1px solid var(--line); background: var(--sheet); }
-.top h1 { font-size: 15px; font-weight: 700; margin-right: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.top h1 span { font-weight: 400; color: var(--slate); }
-.top .pos { font-size: 14px; color: var(--slate); white-space: nowrap; }
-.top .pos b { color: var(--ink); }
-@media (max-width: 1100px) { .hint-keys { display: none; } }
+:focus-visible { outline: var(--sds-size-stroke-focus-ring) solid var(--sds-color-border-brand-default); outline-offset: var(--sds-size-space-050); border-radius: var(--sds-size-radius-100); }
+body { margin: 0; color: var(--sds-color-text-default-default); font: var(--bl-text-body); font-variant-numeric: tabular-nums; overflow: hidden; background: var(--sds-color-background-default-default); -webkit-font-smoothing: antialiased; }
+
+/* ---------- frame: the slide window and the comments panel ---------- */
+.app { height: 100dvh; display: grid; grid-template-columns: minmax(0, 1fr) 372px; grid-template-rows: minmax(0, 1fr); }
+.canvas { min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; position: relative; margin: var(--sds-size-space-300) 0 var(--sds-size-space-300) var(--sds-size-space-300); border-radius: var(--sds-size-radius-400); overflow: hidden; background: var(--sds-color-gray-1000); box-shadow: var(--bl-ring); }
+.pill { position: absolute; top: var(--sds-size-space-400); left: 50%; transform: translateX(-50%); z-index: 5; display: flex; align-items: center; gap: var(--sds-size-space-400); padding: var(--sds-size-space-150) var(--sds-size-space-150) var(--sds-size-space-150) var(--sds-size-space-400); border-radius: var(--sds-size-radius-400); background: var(--sds-color-background-default-default); box-shadow: var(--bl-ring), var(--sds-effects-drop-shadow-600); white-space: nowrap; font-size: var(--sds-typography-body-size-medium); }
+.pill .mark { display: grid; place-items: center; color: var(--sds-color-icon-default-default); }
+.pill .mark svg { width: 18px; height: 18px; display: block; }
+.pill-title { font-size: var(--sds-typography-body-size-medium); font-weight: var(--sds-typography-body-font-weight-regular); }
+.pill-pos { color: var(--sds-color-text-default-secondary); }
+.pill-pos b { color: var(--sds-color-text-default-default); font-weight: var(--sds-typography-body-font-weight-strong); }
+/* A short note under the top pill, e.g. when the demo's Open in Figma has no deck to open */
+.toast { position: absolute; top: calc(var(--sds-size-space-1600) + var(--sds-size-space-200)); left: 50%; z-index: 6; margin: 0; padding: var(--sds-size-space-200) var(--sds-size-space-300); border-radius: var(--sds-size-radius-200); background: var(--sds-color-background-default-default); box-shadow: var(--bl-ring), var(--sds-effects-drop-shadow-600); color: var(--sds-color-text-default-default); font: var(--bl-text-small); white-space: nowrap; pointer-events: none; opacity: 0; transform: translate(-50%, -4px); }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+@media (prefers-reduced-motion: no-preference) { .toast { transition: opacity .18s ease, transform .18s ease; } }
+.side { margin: var(--sds-size-space-300); border-radius: var(--sds-size-radius-400); overflow: hidden; box-shadow: var(--bl-ring); min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; background: var(--sds-color-background-default-secondary); }
+
 /* ---------- canvas: the slides ---------- */
 .scroller { overflow-y: auto; scroll-snap-type: y mandatory; overscroll-behavior: contain; scrollbar-width: none; }
 .scroller::-webkit-scrollbar { display: none; }
 @media (prefers-reduced-motion: no-preference) { .scroller { scroll-behavior: smooth; } }
+.stop { height: 100%; scroll-snap-align: start; scroll-snap-stop: always; container-type: size; display: grid; place-items: center; padding: var(--sds-size-space-2400) var(--sds-size-space-1200) var(--sds-size-space-400); }
+.stop-in { display: grid; gap: var(--sds-size-space-200); width: min(calc(100cqw - 96px), calc((100cqh - 112px - var(--extra)) * 16 / 9)); --extra: 84px; }
+.stop-in.has-thumbs { --extra: 158px; }
+.stop-in.grid6 { width: min(calc(100cqw - 96px), calc((100cqh - 214px) * 2.5)); }
+.stage { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; padding: 0; border: 0; border-radius: var(--sds-size-radius-200); background: var(--sds-color-white-1000); box-shadow: var(--bl-ring); cursor: pointer; overflow: visible; touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 .stage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+.stage > img { border-radius: inherit; }
 .stage .now { opacity: 0; }
-/* The state label sits above the slide, so nothing covers the slide itself */
 .stage.is-now .now { opacity: 1; }
 .stage.still { cursor: default; }
 @media (prefers-reduced-motion: no-preference) { .stage .now { transition: opacity .14s ease; } }
-.cap .r { margin-left: auto; }
-.thumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.thumb { padding: 0; border: 0; background: none; cursor: pointer; display: grid; gap: 3px; width: 96px; text-align: left; font-size: 12px; color: var(--slate); }
-.thumb img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 3px; box-shadow: 0 0 0 1px var(--edge); display: block; background: #fff; }
-.thumb[aria-pressed="true"] img { box-shadow: 0 0 0 2px var(--pencil); }
-.thumb[aria-pressed="true"] { color: var(--pencil); font-weight: 700; }
-.more { font-size: 13px; color: var(--slate); }
-.six { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-.six figure { margin: 0; display: grid; gap: 4px; }
-.six img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 4px; display: block; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .12), 0 6px 18px rgba(0, 0, 0, .1); }
-.six figcaption { font-size: 13px; color: var(--slate); }
-.six figcaption b { color: var(--ink); }
-.six .cut img, .six .fold img { opacity: .3; filter: grayscale(1); }
-.six .plus img { box-shadow: 0 0 0 3px var(--pencil); }
-.six .plus figcaption span { color: var(--pencil); font-weight: 700; }
-/* ---------- strip: one thumbnail per comment ---------- */
-.chip:hover img { opacity: 1; }
-.chip[aria-current="true"] img { opacity: 1; box-shadow: 0 0 0 2px var(--pencil); }
-.chip[aria-current="true"] { color: var(--pencil); font-weight: 700; }
-.chip .mk { position: absolute; top: 3px; right: 3px; width: 9px; height: 9px; border-radius: 50%; box-shadow: 0 0 0 1.5px #fff; }
-.chip .mk.back { background: var(--pencil); }
-.chip .mk.edit { background: #F0B000; }
-.chip .mk.skip { background: var(--muted); }
-.chip-n { display: inline-flex; align-items: center; gap: 5px; }
-.chip[aria-current="true"] .count { background: var(--pencil); color: var(--on-pencil); }
-/* ---------- several comments on one slide ---------- */
-.cmt { display: grid; gap: 12px; }
-/* A comment you're not on: the reviewer's words, then one line saying where it stands. The whole line opens it. */
-.cmt-sum { display: flex; align-items: center; gap: 10px; width: 100%; margin: 0; padding: 8px 10px; border: 0; border-radius: 8px; background: transparent; font: 400 13px/1.4 var(--sans); color: var(--slate); text-align: left; cursor: pointer; }
-.cmt-sum:hover, .cmt-sum:focus-visible { background: rgba(255, 255, 255, .06); color: var(--ink); }
-.cmt-sum .what { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.cmt-sum .open-hint { margin-left: auto; flex: none; color: var(--pencil-text); font-weight: 500; }
-.cmt-sum .ok { color: var(--done); }
-.who .span { display: block; font-size: 12px; color: var(--slate); }
-.on-slide { font-size: 12px; font-weight: 700; color: var(--pencil); white-space: nowrap; }
-.who-row .link { font-size: 12px; white-space: nowrap; }
-.also-on { display: grid; gap: 4px; justify-items: start; padding-top: 12px; border-top: 1px solid var(--line); }
-.label.quiet { color: var(--slate); }
-/* ---------- tap to edit ---------- */
-.redline li.tap { cursor: text; }
-textarea.inline { display: block; width: 100%; padding: 0; margin: 0; border: 0; background: transparent; color: var(--ink); font: inherit; line-height: 1.5; resize: none; field-sizing: content; outline: none; }
-.keys { display: block; margin-top: 4px; font-size: 11px; color: var(--slate); }
-/* ---------- feedback-mode look ---------- */
-body { margin: 0; color: var(--ink); font: 400 15px/1.5 var(--sans); font-variant-numeric: tabular-nums; overflow: hidden; background: #1D1D1F; -webkit-font-smoothing: antialiased; }
-.app { height: 100dvh; display: grid; grid-template-columns: minmax(0, 1fr) 372px; grid-template-rows: minmax(0, 1fr); }
-.canvas { min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; position: relative; margin: 12px 0 12px 12px; border-radius: 28px; overflow: hidden; background: var(--canvas); box-shadow: 0 0 0 1px rgba(255, 255, 255, .06); }
-.pill { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); z-index: 5; display: flex; align-items: center; gap: 20px; padding: 7px 7px 7px 16px; border-radius: 16px; background: rgba(14, 14, 14, .88); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: 0 0 0 1px rgba(255, 255, 255, .1); white-space: nowrap; font-size: 15px; }
-.pill .mark { display: grid; place-items: center; color: var(--ink); }
-.pill .mark svg { width: 18px; height: 18px; display: block; }
-.pill-title { font-size: 15px; font-weight: 400; }
-.pill-pos { color: var(--slate); }
-.pill-pos b { color: var(--ink); font-weight: 500; }
-.pill-btn { padding: 8px 14px; border-radius: 10px; background: var(--well); box-shadow: 0 0 0 1px rgba(255, 255, 255, .12); color: var(--ink); text-decoration: none; }
-.pill-btn:hover { background: var(--well-hover); }
-.stop { height: 100%; scroll-snap-align: start; scroll-snap-stop: always; container-type: size; display: grid; place-items: center; padding: 92px 48px 20px; }
-.stop-in.grid6 { width: min(calc(100cqw - 96px), calc((100cqh - 214px) * 2.5)); }
-.stage .hl { position: absolute; pointer-events: none; border: 1.5px dashed var(--pencil); background: rgba(76, 141, 255, .07); border-radius: 4px; }
-.stage.is-now .hl { border-style: dashed; opacity: .35; }
-/* Every comment's change on one picture: the one you're on is bright, the others are quieter, and every pin opens its comment */
-.stage .hl.off { opacity: .5; background: transparent; }
+/* What changed: a dashed blue box. Blue on this page only ever means "this changed on the slide". */
+.stage .hl { position: absolute; pointer-events: none; border: var(--sds-size-stroke-focus-ring) dashed var(--bl-change); border-radius: var(--sds-size-radius-100); }
+.stage.is-now .hl { opacity: .35; }
+.stage .hl.off { opacity: .5; }
 .stage .hl .hl-who[data-pin] { pointer-events: auto; cursor: pointer; transform: translate(calc(-2px + var(--nudge, 0px)), 2px); }
-.stage .hl.on .hl-who { box-shadow: 0 0 0 2px var(--pencil), 0 2px 4px rgba(0, 0, 0, .45), 0 6px 14px rgba(0, 0, 0, .35); }
+.stage .hl.on .hl-who { box-shadow: 0 0 0 var(--sds-size-stroke-focus-ring) var(--bl-change), var(--sds-effects-drop-shadow-600); }
 .stage .hl.off .hl-who:hover { opacity: 1; }
-.state { font-size: 13px; font-weight: 500; color: var(--slate); }
-.cap { display: flex; flex-wrap: wrap; gap: 4px 12px; color: var(--slate); font-size: 13px; align-items: center; }
-.cap-btn { font: 500 12px var(--sans); color: var(--ink); background: var(--well); border: 0; border-radius: 8px; padding: 4px 10px; box-shadow: 0 0 0 1px rgba(255, 255, 255, .12); cursor: pointer; }
-.cap-btn:hover { background: var(--well-hover); }
-.canvas.no-hl .stage .hl { display: none; }
+.canvas.no-hl .stage .hl, .canvas.no-hl .six .hl { display: none; }
 /* You've changed the wording: the picture is Claude's version, so its outlines go grey and the caption says so */
-.stage.stale .hl { border-color: var(--slate); background: transparent; }
-.cap .stale-note { color: var(--pencil-text); }
-/* Before / After: a pill switch above the slide, outlines toggle on the right of the same row */
-.stop-in { display: grid; gap: 10px; width: min(calc(100cqw - 96px), calc((100cqh - 112px - var(--extra)) * 16 / 9)); --extra: 84px; }
-.stop-in.has-thumbs { --extra: 158px; }
-.bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.bar .cap-btn { padding: 7px 12px; font-size: 13px; }
-.stop-in.is-now .pillsw { --p: 0; }
-.pillsw.dragging .knob { transition: none; }
-.pillsw button { position: relative; z-index: 1; display: grid; place-items: center; padding: 0; border: 0; border-radius: 999px; background: none; font: 500 14px var(--sans); color: var(--slate); cursor: pointer; transition: color .25s ease; }
-.pillsw button[aria-checked="true"] { color: var(--canvas); }
-@media (prefers-reduced-motion: no-preference) { .pillsw .knob { transition: transform .38s cubic-bezier(.3, 1.25, .45, 1); } }
-/* Option grid: a labelled tag on each slide that leaves, a plus on each slide that gains */
-.six .pic { position: relative; display: block; width: 100%; padding: 0; border: 0; background: none; border-radius: 6px; }
-.six .pic.zoom { cursor: zoom-in; }
-.six .pic.zoom:hover img { box-shadow: 0 0 0 3px var(--pencil), 0 0 0 7px rgba(76, 141, 255, .18); }
-.six .hl { position: absolute; border: 1.5px dashed var(--pencil); background: rgba(76, 141, 255, .07); border-radius: 3px; pointer-events: none; }
-.canvas.no-hl .six .hl { display: none; }
-.bar-l { display: flex; align-items: center; gap: 10px; min-height: 36px; }
-/* Your reply is a real text box: solid edge, blue ring while you type, drag the corner to make it taller. Dashed lines are kept for the slide outlines only. */
-textarea.field { display: block; width: 100%; margin: 8px 0 0; padding: 10px 12px; min-height: 84px; max-height: 360px; field-sizing: content; border: 1px solid rgba(255, 255, 255, .16); border-radius: 12px; background: var(--well); color: var(--ink); font: 400 15px/1.5 var(--sans); resize: vertical; cursor: text; caret-color: var(--pencil); transition: border-color .15s, box-shadow .15s; }
-textarea.field:hover { border-color: rgba(255, 255, 255, .28); }
-textarea.field:focus { outline: none; border-color: var(--pencil); box-shadow: 0 0 0 3px rgba(76, 141, 255, .28); }
-textarea.field::placeholder { color: var(--faint); }
-.redline li.editing textarea.inline { margin-top: 4px; padding: 8px 10px; border: 1px solid rgba(255, 255, 255, .16); border-radius: 10px; background: var(--well); resize: vertical; }
-.redline li.editing textarea.inline:focus { border-color: var(--pencil); box-shadow: 0 0 0 3px rgba(76, 141, 255, .28); }
-.icon-btn { margin-left: auto; display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 8px; background: transparent; color: var(--slate); cursor: pointer; }
-.icon-btn:hover { background: rgba(255, 255, 255, .08); color: var(--ink); }
-.icon-btn svg { width: 18px; height: 18px; }
-.gen, .add-reply { display: inline-flex; align-items: center; gap: 7px; margin-top: 8px; padding: 7px 12px; border: 0; border-radius: 10px; background: var(--well); box-shadow: 0 0 0 1px rgba(255, 255, 255, .12); color: var(--ink); font: 500 13px var(--sans); cursor: pointer; }
-.gen:hover, .add-reply:hover { background: var(--well-hover); }
-.gen svg, .add-reply svg { width: 16px; height: 16px; }
-.gen svg { color: var(--pencil-text); }
-.gen[disabled] { cursor: default; color: var(--slate); }
-.gen .spin { margin-right: 0; }
-/* Chat sides: the reviewer's bubble sits left with its point bottom-left; yours sits right, tinted blue, avatar on the right, point bottom-right */
-.fate svg { width: 17px; height: 17px; flex: none; }
-.fate .link { margin-left: 4px; font-size: 14px; }
-.thumb.all .tile { display: grid; place-items: center; width: 100%; aspect-ratio: 16 / 9; border-radius: 6px; background: var(--well); box-shadow: 0 0 0 1px rgba(255, 255, 255, .14); color: var(--ink); }
-.thumb.all .tile svg { width: 20px; height: 20px; }
-.thumb.all:hover .tile { background: var(--well-hover); }
+.stage.stale .hl { border-color: var(--sds-color-border-default-secondary); }
+/* The commenter's pin, after Figma's: a round badge with one sharp corner, just outside the box's top-right corner */
+.hl-who { position: absolute; display: block; z-index: 1; left: 100%; bottom: 100%; transform: translate(-2px, 2px); padding: var(--sds-size-space-050); border-radius: var(--sds-size-radius-full) var(--sds-size-radius-full) var(--sds-size-radius-full) 0; background: var(--sds-color-background-default-default); box-shadow: var(--bl-ring), var(--sds-effects-drop-shadow-600); }
+.hl-who .av { display: grid; width: 26px; height: 26px; font-size: var(--sds-typography-scale-01); box-shadow: none; }
+
+/* Before / After above the slide, outlines toggle on the right of the same row */
+.bar { display: flex; align-items: center; justify-content: space-between; gap: var(--sds-size-space-300); }
+.bar-l { display: flex; align-items: center; gap: var(--sds-size-space-200); min-height: 36px; }
 .bar .state { margin: 0; }
-.six .tag { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px 7px 11px; border-radius: 999px; white-space: nowrap; font: 500 14px var(--sans); color: var(--ink); background: rgba(14, 14, 14, .88); box-shadow: 0 0 0 1px rgba(255, 255, 255, .14); pointer-events: none; }
-.six .tag svg, .six .badge svg { width: 17px; height: 17px; flex: none; }
-.six .badge { position: absolute; top: 8px; right: 8px; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--pencil); color: var(--canvas); pointer-events: none; }
-.six .badge svg { width: 15px; height: 15px; }
-.thumb img, .six img { border-radius: 6px; box-shadow: 0 0 0 1px rgba(255, 255, 255, .08); }
-.strip { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: thin; background: transparent; border-top: 1px solid rgba(255, 255, 255, .06); padding: 12px 24px 16px; }
-.chip img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; box-shadow: 0 0 0 1px var(--edge); display: block; background: #fff; opacity: .75; border-radius: 6px; }
-/* a rounded panel, like the slide window */
-.side-top { padding: 22px 22px 8px; display: grid; gap: 10px; }
-.side-title { font-size: 16px; font-weight: 500; margin-right: auto; }
-.where-line { font-size: 14px; color: var(--slate); }
-.where-line b { color: var(--ink); font-weight: 500; }
-.help { font-size: 14px; color: var(--slate); line-height: 1.5; }
-.who b, .label, .status b { font-weight: 500; }
-.reply p, .also p { font-family: var(--sans); }
-/* No outline on the comment you're on: blue dashes only ever mean "this changed on the slide". The open one is simply the one that's open. */
-.cmt.many { padding: 14px; box-shadow: none; border: 0; border-radius: 12px; background: rgba(255, 255, 255, .05); }
-.cmt.many.folded { gap: 6px; padding: 10px 10px 6px; cursor: pointer; background: transparent; }
-.cmt.many.folded + .cmt.many, .cmt.many + .cmt.many.folded { margin-top: 4px; }
-/* Blue dashes are kept for one meaning only, "this changed on the slide". The wording you can edit is a plain field. */
-.redline li.tap:hover { box-shadow: none; outline: 1px solid rgba(255, 255, 255, .16); outline-offset: 0; }
-.redline li.editing { box-shadow: none; outline: 0; background: transparent; }
-.btn.primary, .go { background: var(--ink); color: var(--canvas); box-shadow: none; }
-@media (max-width: 899px) {
-  .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: 55dvh minmax(0, 1fr); }
-  .canvas { margin: 8px; border-radius: 20px; }
-  .pill { gap: 12px; font-size: 14px; }
-  .pill-title { display: none; }
-  .stop { padding: 76px 16px 12px; }
-  .stop-in { width: min(calc(100cqw - 32px), calc((100cqh - 88px - var(--extra)) * 16 / 9)); }
-  .pillsw { width: 168px; height: 32px; }
-  .six .tag { font-size: 12px; padding: 5px 10px 5px 8px; }
-}
+.state { font-size: var(--sds-typography-body-size-small); font-weight: var(--sds-typography-body-font-weight-strong); color: var(--sds-color-text-default-secondary); }
+.cap { display: flex; flex-wrap: wrap; gap: var(--sds-size-space-100) var(--sds-size-space-300); align-items: center; color: var(--sds-color-text-default-secondary); font-size: var(--sds-typography-body-size-small); }
+.cap .r { margin-left: auto; }
+.cap .stale-note { color: var(--sds-color-text-warning-secondary); }
+.pillsw { --p: 1; position: relative; display: grid; grid-template-columns: 1fr 1fr; width: 196px; height: 36px; padding: var(--sds-size-space-100); border-radius: var(--sds-size-radius-full); background: var(--sds-color-background-default-default); box-shadow: var(--bl-ring); touch-action: none; -webkit-user-select: none; user-select: none; cursor: pointer; }
+.pillsw .knob { position: absolute; top: var(--sds-size-space-100); bottom: var(--sds-size-space-100); left: var(--sds-size-space-100); width: calc(50% - 4px); border-radius: var(--sds-size-radius-full); transform: translateX(calc(var(--p) * 100%)); pointer-events: none; background: var(--sds-color-background-brand-default); }
+.pillsw button { position: relative; z-index: 1; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--sds-size-radius-full); background: none; font: var(--bl-text-small); color: var(--sds-color-text-default-secondary); cursor: pointer; transition: color .25s ease; }
+.pillsw button[aria-checked="true"] { color: var(--sds-color-text-brand-on-brand); }
+.pillsw.dragging .knob { transition: none; }
+.stop-in.is-now .pillsw { --p: 0; }
+@media (prefers-reduced-motion: no-preference) { .pillsw .knob { transition: transform .38s cubic-bezier(.3, 1.25, .45, 1); } }
+
+/* ---------- the option grid on pick cards: a tag on each slide that leaves, a badge on each that gains ---------- */
+.thumbs { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sds-size-space-200); }
+.thumb { padding: 0; border: 0; background: none; cursor: pointer; display: grid; gap: var(--sds-size-space-100); width: 96px; text-align: left; font-size: var(--sds-typography-scale-01); color: var(--sds-color-text-default-secondary); }
+.thumb img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; border-radius: var(--sds-size-radius-100); background: var(--sds-color-white-1000); box-shadow: var(--bl-ring); }
+.thumb[aria-pressed="true"] { color: var(--sds-color-text-default-default); font-weight: var(--sds-typography-body-font-weight-strong); }
+.thumb[aria-pressed="true"] img { box-shadow: var(--bl-ring-selected); }
+.thumb.all .tile { display: grid; place-items: center; width: 100%; aspect-ratio: 16 / 9; border-radius: var(--sds-size-radius-100); }
+.thumb.all .tile svg { width: 20px; height: 20px; }
+.more { font-size: var(--sds-typography-body-size-small); color: var(--sds-color-text-default-secondary); }
+.six { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sds-size-space-300); }
+.six figure { margin: 0; display: grid; gap: var(--sds-size-space-100); }
+.six img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; border-radius: var(--sds-size-radius-100); background: var(--sds-color-white-1000); box-shadow: var(--bl-ring); }
+.six figcaption { font-size: var(--sds-typography-body-size-small); color: var(--sds-color-text-default-secondary); }
+.six figcaption b { color: var(--sds-color-text-default-default); font-weight: var(--sds-typography-body-font-weight-strong); }
+.six figcaption span { font-weight: var(--sds-typography-body-font-weight-strong); }
+.six .cut img, .six .fold img { opacity: .3; filter: grayscale(1); }
+.six .plus img { box-shadow: 0 0 0 var(--sds-size-stroke-focus-ring) var(--bl-change); }
+.six .plus figcaption span { color: var(--bl-change-text); }
+.six .pic { position: relative; display: block; width: 100%; padding: 0; border: 0; background: none; border-radius: var(--sds-size-radius-100); }
+.six .pic.zoom { cursor: zoom-in; }
+.six .pic.zoom:hover img { box-shadow: var(--bl-ring-selected); }
+.six .hl { position: absolute; border: var(--sds-size-stroke-focus-ring) dashed var(--bl-change); border-radius: var(--sds-size-radius-100); pointer-events: none; }
+.six .tag { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: inline-flex; align-items: center; gap: var(--sds-size-space-150); padding: var(--sds-size-space-150) var(--sds-size-space-300); border-radius: var(--sds-size-radius-full); white-space: nowrap; font: var(--bl-text-small); color: var(--sds-color-text-default-default); background: var(--sds-color-background-default-default); box-shadow: var(--bl-ring), var(--sds-effects-drop-shadow-600); pointer-events: none; }
+.six .tag svg, .six .badge svg { width: 16px; height: 16px; flex: none; }
+.six .badge { position: absolute; top: var(--sds-size-space-200); right: var(--sds-size-space-200); display: grid; place-items: center; width: 28px; height: 28px; border-radius: var(--sds-size-radius-full); background: var(--bl-change); color: var(--sds-color-icon-default-default); pointer-events: none; }
+.six .cut figcaption span { text-decoration: none; }
+
+/* ---------- strip: one thumbnail per slide with comments ---------- */
+.strip { display: flex; gap: var(--sds-size-space-200); overflow-x: auto; scrollbar-width: thin; background: transparent; border-top: var(--sds-size-stroke-border) solid var(--sds-color-border-default-default); padding: var(--sds-size-space-300) var(--sds-size-space-600) var(--sds-size-space-400); }
+.chip { flex: none; position: relative; width: 76px; padding: 0; border: 0; background: none; cursor: pointer; display: grid; gap: var(--sds-size-space-100); color: var(--sds-color-text-default-secondary); text-align: left; font-size: var(--sds-typography-scale-01); }
+.chip img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; border-radius: var(--sds-size-radius-100); background: var(--sds-color-white-1000); box-shadow: var(--bl-ring); opacity: .75; }
+.chip:hover img { opacity: 1; }
+.chip[aria-current="true"] { color: var(--sds-color-text-default-default); font-weight: var(--sds-typography-body-font-weight-strong); }
+.chip[aria-current="true"] img { opacity: 1; box-shadow: var(--bl-ring-selected); }
+.chip-n { display: inline-flex; align-items: center; gap: var(--sds-size-space-100); }
+.count { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 var(--sds-size-space-100); border-radius: var(--sds-size-radius-full); font-size: var(--sds-typography-scale-01); font-weight: var(--sds-typography-body-font-weight-strong); color: var(--sds-color-text-default-default); background: var(--sds-color-background-default-tertiary); }
+.chip[aria-current="true"] .count { background: var(--sds-color-background-brand-default); color: var(--sds-color-text-brand-on-brand); }
+/* A dot on the thumbnail: yellow if you've edited something, blue while Claude changes the slide, a green check when it's done */
+.chip .mk { position: absolute; top: var(--sds-size-space-100); right: var(--sds-size-space-100); width: 10px; height: 10px; border-radius: var(--sds-size-radius-full); box-shadow: 0 0 0 var(--sds-size-stroke-focus-ring) var(--sds-color-background-default-default); }
+.chip .mk.edit { background: var(--sds-color-background-warning-default); }
+.chip .mk.work { background: var(--bl-change); }
+.chip .mk.done { width: 16px; height: 16px; box-shadow: none; background: var(--sds-color-background-positive-default); }
+.chip .mk.done::after { content: ""; position: absolute; left: 50%; top: 45%; width: 4px; height: 8px; border: solid var(--sds-color-icon-positive-on-positive); border-width: 0 var(--sds-size-stroke-focus-ring) var(--sds-size-stroke-focus-ring) 0; transform: translate(-50%, -50%) rotate(45deg); }
+.chip:has(.mk.done) img { opacity: .35; box-shadow: 0 0 0 var(--sds-size-stroke-focus-ring) var(--sds-color-border-positive-secondary); }
+.chip:has(.mk.done):hover img { opacity: .6; }
+.chip[aria-current="true"]:has(.mk.done) img { opacity: 1; }
+
 /* ---------- sidebar ---------- */
-.side { margin: 12px; border-radius: 28px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255, 255, 255, .06); min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; background: var(--sheet); }
-.side-head { border: 0; display: flex; align-items: center; gap: 8px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
-.side-head p { margin-right: auto; font-size: 14px; color: var(--slate); }
-.side-head p b { color: var(--ink); }
-.step { box-shadow: 0 0 0 1px rgba(255, 255, 255, .12); width: 32px; height: 32px; display: grid; place-items: center; border: 1.5px solid var(--line); border-radius: 6px; background: transparent; cursor: pointer; font-size: 15px; line-height: 1; }
-.step:hover:not(:disabled) { border-color: var(--slate); }
-.side-body { overflow-y: auto; padding: 18px; display: grid; gap: 14px; align-content: start; }
-.who { font-size: 14px; color: var(--slate); }
-.who b { color: var(--ink); }
-.claude { border-top-color: rgba(255, 255, 255, .07); display: grid; gap: 8px; padding-top: 14px; border-top: 1px solid var(--line); }
-.label { font-size: 13px; font-weight: 700; color: var(--pencil); }
-.label.mine { color: #B07F00; }
-:root[data-theme="dark"] .label.mine { color: #F0C24A; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .label.mine { color: #F0C24A; } }
-.change { font-size: 15px; }
-.redline { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 15px; }
-.redline li { padding: 6px 10px; border-radius: 4px; background: var(--raise); box-shadow: 0 0 0 1px var(--edge); }
-.ctx { display: block; font-size: 12px; font-weight: 700; color: var(--slate); margin-bottom: 1px; }
-del { color: var(--slate); text-decoration-color: var(--slate); }
-ins { text-decoration: none; background: var(--pencil-wash); color: var(--ink); box-shadow: inset 0 -2px 0 var(--pencil); padding: 0 1px; }
-.note { font-size: 13px; color: var(--slate); }
-.why, .also { font-size: 14px; color: var(--slate); }
-.why summary:hover, .also summary:hover { color: var(--ink); }
-.also p { margin-top: 6px; font: 400 15px/1.55 var(--serif); color: var(--ink); }
-.reply p { font: 400 15px/1.55 var(--serif); }
-.opts { display: grid; gap: 6px; }
-.opt small { font-weight: 400; color: var(--slate); }
-.act { display: grid; gap: 10px; justify-items: start; padding-top: 4px; }
-.btns { display: flex; flex-wrap: wrap; gap: 8px; }
-.btn { box-shadow: 0 0 0 1px rgba(255, 255, 255, .12); font-size: 14px; font-weight: 700; border: 1.5px solid var(--line); background: transparent; border-radius: 6px; padding: 7px 14px; min-height: 38px; cursor: pointer; }
-.btn:hover { background: var(--well-hover); border-color: var(--slate); }
-.box { display: grid; gap: 8px; width: 100%; }
-.box label { font-size: 13px; font-weight: 700; }
-.box label .ctx { display: inline; margin: 0; }
-.box textarea { border-color: rgba(255, 255, 255, .12); width: 100%; min-height: 44px; field-sizing: content; resize: vertical; padding: 8px 10px; border: 1.5px solid var(--line); border-radius: 6px; background: var(--raise); }
-.box textarea:focus { outline: 2px solid var(--pencil); outline-offset: 1px; border-color: var(--pencil); }
-.row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
-.link { text-decoration-color: rgba(255, 255, 255, .35); font-size: 13px; font-weight: 700; color: var(--pencil); background: none; border: 0; padding: 2px 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
-.link.quiet { color: var(--slate); }
-.status { font-size: 14px; }
-.status b { color: var(--pencil); }
-/* ---------- approve panel ---------- */
-.side-foot { padding: 16px 18px 18px; border-top: 1px solid var(--line); display: grid; gap: 12px; }
-.seen { display: grid; gap: 6px; font-size: 13px; color: var(--slate); }
-.seen b { color: var(--ink); }
-.meter { height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
-.meter i { display: block; height: 100%; width: 100%; background: var(--pencil); transform: scaleX(0); transform-origin: left; }
-@media (prefers-reduced-motion: no-preference) { .meter i { transition: transform .3s ease; } }
-.tally { font-size: 13px; color: var(--slate); }
-.tally b { color: var(--ink); }
-/* Something didn't get through: the server is unreachable, or a reply didn't post */
-.tally.warn, .msg.out .msg-body > p.msg-sub.warn { color: #F2B36B; }
-.msg-sub .spin { margin-right: 6px; vertical-align: -2px; }
-.msg-sub.sent-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-.msg-sub.sent-row .link { font-size: 12px; padding: 0; }
+.side-top { padding: var(--sds-size-space-400) var(--sds-size-space-400) var(--sds-size-space-200); display: grid; gap: var(--sds-size-space-300); }
+.side-head { display: flex; align-items: center; gap: var(--sds-size-space-200); padding: 0 0 var(--sds-size-space-300); border: 0; border-bottom: var(--sds-size-stroke-border) solid var(--sds-color-border-default-default); }
+.side-head p { margin-right: auto; font-size: var(--sds-typography-body-size-small); color: var(--sds-color-text-default-secondary); }
+.side-head p b { color: var(--sds-color-text-default-default); }
+.side-title { font-size: var(--sds-typography-body-size-medium); font-weight: var(--sds-typography-body-font-weight-strong); margin-right: auto; }
+.where-line { font-size: var(--sds-typography-body-size-small); color: var(--sds-color-text-default-secondary); }
+.where-line b { color: var(--sds-color-text-default-default); font-weight: var(--sds-typography-body-font-weight-strong); }
+.help { font-size: var(--sds-typography-body-size-small); color: var(--sds-color-text-default-secondary); }
+.side-body { overflow-y: auto; padding: var(--sds-size-space-400); display: grid; gap: var(--sds-size-space-400); align-content: start; }
+.who { font-size: var(--sds-typography-body-size-small); color: var(--sds-color-text-default-secondary); }
+.who b { color: var(--sds-color-text-default-default); font-weight: var(--sds-typography-body-font-weight-strong); }
+.who .span { display: block; font-size: var(--sds-typography-scale-01); color: var(--sds-color-text-default-secondary); }
+
+/* ---------- several comments on one slide ---------- */
+.cmt { display: grid; gap: var(--sds-size-space-300); }
+/* the open comment is an SDS Card; the others fold to one line each */
+.cmt.many { padding: var(--sds-size-space-300); border: var(--sds-size-stroke-border) solid var(--sds-color-border-default-default); border-radius: var(--sds-size-radius-400); background: var(--sds-color-background-default-default); }
+.cmt.many.folded { gap: var(--sds-size-space-150); padding: var(--sds-size-space-200) var(--sds-size-space-200) var(--sds-size-space-150); background: transparent; cursor: pointer; }
+.cmt.many.folded + .cmt.many, .cmt.many + .cmt.many.folded { margin-top: var(--sds-size-space-100); }
+.cmt.locked .tap { pointer-events: none; }
+.cmt.locked .claude > .note { display: none; }
+/* A comment you're not on: the reviewer's words, then one line saying where it stands. The whole line opens it. */
+.cmt-sum { display: flex; align-items: center; gap: var(--sds-size-space-200); width: 100%; margin: 0; padding: var(--sds-size-space-200) var(--sds-size-space-300); border: 0; border-radius: var(--sds-size-radius-200); background: transparent; font: var(--bl-text-small); color: var(--sds-color-text-default-secondary); text-align: left; cursor: pointer; }
+.cmt-sum:hover, .cmt-sum:focus-visible { background: var(--sds-color-background-default-default-hover); color: var(--sds-color-text-default-default); }
+.cmt-sum .what { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.cmt-sum .open-hint { margin-left: auto; flex: none; color: var(--sds-color-text-default-default); font-weight: var(--sds-typography-body-font-weight-strong); }
+.cmt-sum .ok { color: var(--sds-color-text-positive-secondary); }
+.also-on { display: grid; gap: var(--sds-size-space-100); justify-items: start; padding-top: var(--sds-size-space-300); border-top: var(--sds-size-stroke-border) solid var(--sds-color-border-default-default); }
+
+/* ---------- comment bubbles, after Figma's: the reviewer's sits left with its square corner bottom-left; yours sits right ---------- */
+.thread { display: grid; gap: var(--sds-size-space-300); padding: var(--sds-size-space-300) var(--sds-size-space-400) var(--sds-size-space-400); border-radius: var(--sds-size-radius-400) var(--sds-size-radius-400) var(--sds-size-radius-400) var(--sds-size-radius-100); background: var(--sds-color-background-neutral-secondary); box-shadow: var(--bl-ring); }
+.cmt > .thread { margin: 0 var(--sds-size-space-800) 0 0; }
+.thread.me { margin: 0 0 0 var(--sds-size-space-800); border-radius: var(--sds-size-radius-400) var(--sds-size-radius-400) var(--sds-size-radius-100) var(--sds-size-radius-400); background: var(--sds-color-background-brand-secondary); box-shadow: none; }
+.thread.me.later, .thread.me.later-box { margin-top: var(--sds-size-space-300); }
+.msg { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: var(--sds-size-space-300); }
+.msg.in-reply { padding-top: var(--sds-size-space-300); border-top: var(--sds-size-stroke-border) solid var(--sds-color-border-default-default); }
+.msg-head { display: flex; flex-wrap: wrap; gap: var(--sds-size-space-050) var(--sds-size-space-200); align-items: center; min-height: 32px; margin: 0; font: var(--bl-text-small); color: var(--sds-color-text-default-secondary); }
+.msg-head b { color: var(--sds-color-text-default-default); font-weight: var(--sds-typography-body-font-weight-strong); font-size: var(--sds-typography-body-size-medium); }
+.msg-head .span { font-size: var(--sds-typography-scale-01); }
+.msg-text { margin: var(--sds-size-space-050) 0 0; color: var(--sds-color-text-default-default); font-size: var(--sds-typography-body-size-medium); }
+/* your reply: the photo sits in the top-right corner, so the reply box spans the whole bubble */
+.msg.out { display: block; position: relative; }
+.msg.out > .av { position: absolute; top: 0; right: 0; }
+.msg.out .msg-head { flex-wrap: nowrap; padding-right: var(--sds-size-space-1200); }
+.msg.out.writing .msg-head { padding-right: 0; }   /* writing: photo left, × or bin right */
+.msg.out .msg-body > p.msg-sub { margin: var(--sds-size-space-150) 0 0; font-size: var(--sds-typography-scale-01); color: var(--sds-color-text-default-secondary); }
+.msg.out .msg-body > p:not(.msg-head):not(.msg-sub) { margin: var(--sds-size-space-050) 0 0; font: var(--bl-text-body); color: var(--sds-color-text-default-default); }
+.msg-sub .spin { margin-right: var(--sds-size-space-150); vertical-align: -2px; }
+.msg-sub.sent-row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sds-size-space-300); }
+.msg-sub.sent-row .link { font-size: var(--sds-typography-scale-01); padding: 0; }
+.av { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--sds-size-radius-full); font-size: var(--sds-typography-scale-01); font-weight: var(--sds-typography-body-font-weight-strong); color: var(--sds-color-text-default-default); background: var(--sds-color-slate-700); }
+.av.sm { width: 28px; height: 28px; }
+.av.c1 { background: var(--sds-color-yellow-700); }
+.av.c2 { background: var(--sds-color-green-700); }
+.av.c3 { background: var(--sds-color-pink-700); }
+.av.c4 { background: var(--sds-color-pink-900); }
+/* you, in the brand colour: it stands out on your own bubble and on the card behind the reply box */
+.av.me { background: var(--sds-color-background-brand-default); color: var(--sds-color-text-brand-on-brand); }
+.av.photo { object-fit: cover; padding: 0; background: var(--sds-color-background-default-tertiary); }
+
+/* ---------- Claude's change ---------- */
+.claude { display: grid; gap: var(--sds-size-space-200); padding-top: var(--sds-size-space-300); border-top: var(--sds-size-stroke-border) solid var(--sds-color-border-default-default); }
+.label { font-size: var(--sds-typography-body-size-small); font-weight: var(--sds-typography-body-font-weight-strong); color: var(--sds-color-text-default-default); }
+.label.mine { color: var(--sds-color-text-warning-secondary); }
+.label.quiet { color: var(--sds-color-text-default-secondary); }
+.change { font-size: var(--sds-typography-body-size-medium); }
+.redline { display: grid; gap: var(--sds-size-space-150); margin: 0; padding: 0; list-style: none; font-size: var(--sds-typography-body-size-medium); }
+.redline li { padding: var(--sds-size-space-150) var(--sds-size-space-300); border-radius: var(--sds-size-radius-200); background: var(--sds-color-background-default-default); box-shadow: var(--bl-ring); }
+.redline li.tap { cursor: text; }
+.redline li.tap:hover { outline: var(--sds-size-stroke-border) solid var(--sds-color-border-default-secondary); outline-offset: 0; }
+.redline li.editing { box-shadow: none; outline: 0; background: transparent; }
+.redline li.editing textarea { cursor: text; }
+.ctx { display: block; font-size: var(--sds-typography-scale-01); font-weight: var(--sds-typography-body-font-weight-strong); color: var(--sds-color-text-default-secondary); }
+.was { display: block; font-size: var(--sds-typography-body-size-small); color: var(--sds-color-text-default-secondary); margin-bottom: var(--sds-size-space-050); }
+del { color: var(--sds-color-text-default-secondary); text-decoration-color: var(--sds-color-text-default-secondary); }
+ins { text-decoration-line: underline; text-decoration-color: var(--bl-change); text-decoration-thickness: var(--sds-size-stroke-focus-ring); text-underline-offset: var(--sds-size-space-100); background: var(--bl-change-wash); color: var(--sds-color-text-default-default); padding: 0 var(--sds-size-space-050); }
+textarea.inline { display: block; width: 100%; padding: 0; margin: 0; border: 0; background: transparent; color: var(--sds-color-text-default-default); font: inherit; line-height: 1.4; resize: none; field-sizing: content; outline: none; }
+.redline li.editing textarea.inline { margin-top: var(--sds-size-space-100); padding: var(--sds-size-space-200) var(--sds-size-space-300); border: var(--sds-size-stroke-border) solid var(--sds-color-border-default-default); border-radius: var(--sds-size-radius-200); background: var(--sds-color-background-default-default); resize: vertical; }
+.redline li.editing textarea.inline:focus { border-color: var(--sds-color-border-brand-default); }
+.keys { display: block; margin-top: var(--sds-size-space-100); font-size: var(--sds-typography-scale-01); color: var(--sds-color-text-default-secondary); }
+.note { font-size: var(--sds-typography-body-size-small); color: var(--sds-color-text-default-secondary); }
+.act .note { margin: 0; }
+.revised { font-size: var(--sds-typography-body-size-small); color: var(--sds-color-text-default-secondary); margin: 0; }
+.why, .also { font-size: var(--sds-typography-body-size-small); color: var(--sds-color-text-default-secondary); }
+.why summary, .also summary { cursor: pointer; width: max-content; font-weight: var(--sds-typography-body-font-weight-strong); }
+.why summary:hover, .also summary:hover { color: var(--sds-color-text-default-default); }
+.why p { margin-top: var(--sds-size-space-200); }
+.also { margin-top: var(--sds-size-space-100); }
+.also p { margin-top: var(--sds-size-space-150); font: var(--bl-text-body); color: var(--sds-color-text-default-default); }
+.reply p { font: var(--bl-text-body); }
+.thread .msg-head, .also .thread .msg-head, .reply .thread .msg-head { margin: 0; font: var(--bl-text-small); }
+.status { font-size: var(--sds-typography-body-size-small); }
+.status b { color: var(--sds-color-text-default-default); font-weight: var(--sds-typography-body-font-weight-strong); }
+.ok { color: var(--sds-color-text-positive-secondary); font-weight: var(--sds-typography-body-font-weight-strong); }
+.state-line { display: flex; align-items: center; gap: var(--sds-size-space-200); flex-wrap: wrap; font-size: var(--sds-typography-body-size-small); color: var(--sds-color-text-default-secondary); margin: 0; }
+.state-line b { color: var(--sds-color-text-default-default); font-weight: var(--sds-typography-body-font-weight-strong); }
+.state-line .spin { margin-right: 0; color: var(--bl-change); }
+.fate { display: inline-flex; align-items: center; gap: var(--sds-size-space-200); margin: 0; padding: var(--sds-size-space-150) var(--sds-size-space-300); border-radius: var(--sds-size-radius-full); font-size: var(--sds-typography-body-size-small); color: var(--sds-color-text-default-default); background: var(--sds-color-background-neutral-secondary); box-shadow: var(--bl-ring); }
+.fate svg { width: 16px; height: 16px; flex: none; }
+.fate .link { margin-left: var(--sds-size-space-100); font-size: var(--sds-typography-body-size-small); }
+
+/* ---------- buttons: SDS Button (Primary, Neutral, Subtle) and Icon Button ---------- */
+.act { display: grid; gap: var(--sds-size-space-300); justify-items: start; padding-top: var(--sds-size-space-100); }
+.act > .add-reply { margin-top: var(--sds-size-space-300); }
+.act > .thread.me.later, .act > .thread.me.later-box { justify-self: stretch; align-self: stretch; }   /* fills the column after its left margin; width: 100% would push it past the edge */
+.btns { display: flex; flex-wrap: wrap; gap: var(--sds-size-space-200); }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sds-size-space-200) var(--sds-size-space-300); }
+.btn, .opt, .cap-btn, .pill-btn, .add-reply, .gen, .thumb.all .tile { border: var(--sds-size-stroke-border) solid var(--sds-color-border-neutral-secondary); background: var(--sds-color-background-neutral-tertiary); color: var(--sds-color-text-default-default); box-shadow: none; cursor: pointer; transition: background .15s, border-color .15s, transform .08s; }
+.btn:hover, .opt:hover, .cap-btn:hover, .pill-btn:hover, .add-reply:hover, .gen:hover, .thumb.all:hover .tile { background: var(--sds-color-background-neutral-tertiary-hover); }
+.btn:active, .opt:active, .cap-btn:active, .pill-btn:active, .add-reply:active, .thumb.all:active .tile { transform: translateY(1px); }
+.btn { min-height: 40px; padding: calc(var(--sds-size-space-300) - var(--sds-size-stroke-border)) var(--sds-size-space-300); border-radius: var(--sds-size-radius-200); font: var(--bl-text-body); line-height: 1; }
+.btn.primary, .go { border-color: var(--sds-color-border-brand-default); background: var(--sds-color-background-brand-default); color: var(--sds-color-text-brand-on-brand); }
+.btn.primary:hover, .go:hover:not(:disabled) { background: var(--sds-color-background-brand-hover); }
+.go { width: 100%; min-height: 40px; padding: calc(var(--sds-size-space-300) - var(--sds-size-stroke-border)) var(--sds-size-space-400); border: var(--sds-size-stroke-border) solid var(--sds-color-border-brand-default); border-radius: var(--sds-size-radius-200); font: var(--bl-text-body); line-height: 1; cursor: pointer; transition: background .15s, transform .08s; }
+.go:active:not(:disabled) { transform: translateY(1px); }
 .go:disabled { opacity: .6; cursor: progress; }
-.foot-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-.done { display: grid; gap: 10px; }
-.done h2 { font-size: 18px; }
-.done p { font-size: 14px; color: var(--slate); }
-.sum { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; font-size: 14px; color: var(--slate); }
-.sum b { color: var(--ink); font-weight: 500; }
 .go-deck { display: flex; align-items: center; justify-content: center; text-decoration: none; }
-/* ---------- working: while Claude updates the deck or posts the replies ---------- */
-.spin { display: inline-block; width: 14px; height: 14px; margin-right: 8px; vertical-align: -2px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; }
-@media (prefers-reduced-motion: no-preference) {
-  .sweep i { width: 40%; opacity: 1; animation: sweep 1.4s cubic-bezier(.45, 0, .55, 1) infinite; }
-  .spin { animation: spin .8s linear infinite; }
-}
+.opts { display: grid; gap: var(--sds-size-space-200); }
+.opt { padding: calc(var(--sds-size-space-300) - var(--sds-size-stroke-border)) var(--sds-size-space-300); border-radius: var(--sds-size-radius-200); font: var(--bl-text-small); text-align: left; }
+.opt small { font-weight: var(--sds-typography-body-font-weight-regular); color: var(--sds-color-text-default-secondary); }
+.opt[aria-pressed="true"] { border-color: var(--sds-color-border-brand-default); background: var(--sds-color-background-brand-secondary); }
+.cap-btn { padding: var(--sds-size-space-150) var(--sds-size-space-300); border-radius: var(--sds-size-radius-200); font: var(--bl-text-small); }
+.pill-btn { padding: var(--sds-size-space-200) var(--sds-size-space-300); border-radius: var(--sds-size-radius-200); font: var(--bl-text-small); text-decoration: none; }
+.gen, .add-reply { display: inline-flex; align-items: center; gap: var(--sds-size-space-200); margin-top: var(--sds-size-space-200); padding: var(--sds-size-space-150) var(--sds-size-space-300); border-radius: var(--sds-size-radius-200); font: var(--bl-text-small); }
+.add-reply { justify-self: start; width: max-content; }
+.gen svg, .add-reply svg { width: 16px; height: 16px; }
+.gen svg { color: var(--sds-color-icon-default-secondary); }
+.gen[disabled] { cursor: default; color: var(--sds-color-text-default-secondary); }
+.gen .spin { margin-right: 0; }
+/* Icon buttons are round, as in SDS: the slide arrows (Neutral) and the × / bin (Subtle) */
+.step { width: 32px; height: 32px; display: grid; place-items: center; padding: 0; border: var(--sds-size-stroke-border) solid var(--sds-color-border-default-default); border-radius: var(--sds-size-radius-full); background: var(--sds-color-background-default-secondary); color: var(--sds-color-icon-default-default); cursor: pointer; font-size: var(--sds-typography-body-size-medium); line-height: 1; transition: background .15s, transform .08s; }
+.step:hover:not(:disabled) { background: var(--sds-color-background-default-default-hover); }
+.step:active:not(:disabled) { transform: translateY(1px); }
+.step:disabled { opacity: .35; cursor: default; background: transparent; }
+.icon-btn { margin-left: auto; display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: var(--sds-size-radius-full); background: transparent; color: var(--sds-color-icon-default-secondary); cursor: pointer; }
+.icon-btn:hover { background: var(--sds-color-background-default-default-hover); color: var(--sds-color-icon-default-default); }
+.icon-btn svg { width: 18px; height: 18px; }
+.link { font-size: var(--sds-typography-body-size-small); font-weight: var(--sds-typography-body-font-weight-regular); color: var(--sds-color-text-default-default); background: none; border: 0; padding: var(--sds-size-space-050) 0; cursor: pointer; text-decoration: underline; text-underline-offset: var(--sds-size-space-100); }
+.link.quiet { color: var(--sds-color-text-default-secondary); }
+@media (prefers-reduced-motion: reduce) { .btn:active, .cap-btn:active, .pill-btn:active, .step:active, .opt:active, .add-reply:active, .go:active { transform: none; } }
+
+/* ---------- fields: SDS Input / Textarea ---------- */
+.box { display: grid; gap: var(--sds-size-space-200); width: 100%; }
+.box label { font-size: var(--sds-typography-body-size-small); font-weight: var(--sds-typography-body-font-weight-strong); }
+.box label .ctx { display: inline; margin: 0; }
+textarea.field, .box textarea { display: block; width: 100%; padding: var(--sds-size-space-300) var(--sds-size-space-400); border: var(--sds-size-stroke-border) solid var(--sds-color-border-default-default); border-radius: var(--sds-size-radius-200); background: var(--sds-color-background-default-default); color: var(--sds-color-text-default-default); font: var(--bl-text-body); field-sizing: content; resize: vertical; cursor: text; caret-color: var(--sds-color-text-default-default); transition: border-color .15s; }
+textarea.field { margin: var(--sds-size-space-200) 0 0; min-height: 84px; max-height: 360px; }
+.box textarea { min-height: 44px; }
+textarea.field:hover, .box textarea:hover { border-color: var(--sds-color-border-default-secondary); }
+textarea.field:focus, .box textarea:focus { outline: none; border-color: var(--sds-color-border-brand-default); }
+textarea.field::placeholder { color: var(--sds-color-text-default-tertiary); }
+/* Your reply: one field, with Ask Claude inside it at the bottom left */
+.composer { position: relative; margin-top: var(--sds-size-space-200); border: var(--sds-size-stroke-border) solid var(--sds-color-border-default-default); border-radius: var(--sds-size-radius-200); background: var(--sds-color-background-default-default); transition: border-color .15s; }
+.composer:hover { border-color: var(--sds-color-border-default-secondary); }
+.composer:focus-within { border-color: var(--sds-color-border-brand-default); }
+.composer textarea.field, .thread.me .composer textarea.field { margin: 0; border: 0; background: transparent; }
+.composer.empty textarea.field { min-height: 92px; padding-bottom: var(--sds-size-space-1200); }
+.thread.me .composer { margin-top: var(--sds-size-space-300); }
+.thread.me textarea.field { overflow-y: hidden; max-height: none; }
+.composer .gen { position: absolute; left: var(--sds-size-space-200); bottom: var(--sds-size-space-200); margin: 0; border: 0; }
+.composer .gen.draft { display: inline-flex; align-items: center; height: 28px; padding: 0 var(--sds-size-space-300); border: 0; border-radius: var(--sds-size-radius-full); background: var(--sds-color-background-neutral-secondary); color: var(--sds-color-text-default-secondary); font: var(--bl-text-small); line-height: 1; cursor: pointer; transition: background .15s, color .15s; flex: none; }
+.composer .gen.draft:hover { background: var(--sds-color-background-default-default-hover); color: var(--sds-color-text-default-default); }
+.composer .gen.busy { background: transparent; color: var(--sds-color-text-default-secondary); animation: genpulse 1.2s ease-in-out infinite; }
+@keyframes genpulse { 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .composer .gen.busy { animation: none; } }
+/* A reply to a done comment has no Approve to go out with, so its box has a send button (SDS Icon Button, Primary) */
+.composer.sends textarea.field { padding-bottom: var(--sds-size-space-1200); }
+.composer .send { position: absolute; right: var(--sds-size-space-200); bottom: var(--sds-size-space-200); display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: var(--sds-size-radius-full); cursor: pointer; background: var(--sds-color-background-brand-default); color: var(--sds-color-icon-brand-on-brand); transition: background .15s, transform .08s; }
+.composer .send svg { width: 16px; height: 16px; }
+.composer .send:hover:not(:disabled) { background: var(--sds-color-background-brand-hover); }
+.composer .send:active:not(:disabled) { transform: translateY(1px); }
+.composer .send:disabled { background: var(--sds-color-background-disabled-default); color: var(--sds-color-icon-disabled-default); cursor: default; }
+
+/* ---------- approve panel ---------- */
+.side-foot { padding: var(--sds-size-space-400); border-top: var(--sds-size-stroke-border) solid var(--sds-color-border-default-default); display: grid; gap: var(--sds-size-space-300); }
+.side-foot b { font-weight: var(--sds-typography-body-font-weight-strong); }
+.seen { display: grid; gap: var(--sds-size-space-200); font-size: var(--sds-typography-body-size-small); color: var(--sds-color-text-default-secondary); }
+.seen b { color: var(--sds-color-text-default-default); }
+.foot-row { display: flex; justify-content: space-between; align-items: center; gap: var(--sds-size-space-200); }
+.meter { height: 4px; border-radius: var(--sds-size-radius-full); background: var(--sds-color-background-default-tertiary); overflow: hidden; }
+.meter i { display: block; height: 100%; width: 100%; background: var(--sds-color-background-brand-default); transform: scaleX(0); transform-origin: left; }
+@media (prefers-reduced-motion: no-preference) { .meter i { transition: transform .3s ease; } }
+.tally { font-size: var(--sds-typography-body-size-small); color: var(--sds-color-text-default-secondary); }
+.tally b { color: var(--sds-color-text-default-default); }
+/* Something didn't get through: the server is unreachable, or a reply didn't post */
+.tally.warn, .msg.out .msg-body > p.msg-sub.warn { color: var(--sds-color-text-warning-secondary); }
+.done { display: grid; gap: var(--sds-size-space-300); }
+.done h2 { font-size: var(--sds-typography-heading-size-small); font-weight: var(--sds-typography-heading-font-weight); }
+.done p { font-size: var(--sds-typography-body-size-small); color: var(--sds-color-text-default-secondary); }
+.sum { display: grid; gap: var(--sds-size-space-100); margin: 0; padding: 0; list-style: none; font-size: var(--sds-typography-body-size-small); color: var(--sds-color-text-default-secondary); }
+.sum b { color: var(--sds-color-text-default-default); }
+
+/* ---------- working: while Claude updates the deck or posts a reply ---------- */
+.spin { display: inline-block; width: 14px; height: 14px; margin-right: var(--sds-size-space-200); vertical-align: -2px; border-radius: var(--sds-size-radius-full); border: var(--sds-size-stroke-focus-ring) solid currentColor; border-right-color: transparent; }
+@media (prefers-reduced-motion: no-preference) { .spin { animation: spin .8s linear infinite; } }
 @keyframes spin { to { transform: rotate(360deg); } }
+
 /* ---------- narrow screens: the slide stays pinned on top, comments and Approve scroll below it ---------- */
 @media (max-width: 899px) {
   html, body { height: auto; }
   body { overflow: auto; }
   .app { height: auto; min-height: 100dvh; grid-template-columns: minmax(0, 1fr); grid-template-rows: 52dvh auto; }
-  .canvas { position: sticky; top: 0; z-index: 3; margin: 8px; border-radius: 20px; height: calc(52dvh - 16px); }
-  .stop { padding: 64px 12px 8px; }
+  .canvas { position: sticky; top: 0; z-index: 3; margin: var(--sds-size-space-200); height: calc(52dvh - 16px); }
+  .pill { top: var(--sds-size-space-200); gap: var(--sds-size-space-300); padding: var(--sds-size-space-100) var(--sds-size-space-100) var(--sds-size-space-100) var(--sds-size-space-300); font-size: var(--sds-typography-body-size-small); }
+  .pill-btn { padding: var(--sds-size-space-150) var(--sds-size-space-300); }
+  .pill-title { display: none; }
+  .toast { top: calc(var(--sds-size-space-1200) + var(--sds-size-space-200)); }
+  .stop { padding: var(--sds-size-space-1600) var(--sds-size-space-300) var(--sds-size-space-200); }
   .stop-in { --extra: 72px; width: min(100cqw, calc((100cqh - var(--extra)) * 16 / 9)); }
   .stop-in.has-thumbs { --extra: 160px; }
-  .cap .r { display: none; }   /* no room for the click hint; tapping the slide still swaps it */
   .stop-in.grid6 { width: min(100cqw, calc((100cqh - 80px) * 2.5)); }
-  .side { min-height: 0; display: block; margin: 0 8px 8px; border-radius: 20px; }
-  .side-top { padding: 14px 16px 4px; }
-  .side-body { overflow: visible; padding: 8px 16px 16px; }
-  .side-foot { padding: 14px 16px calc(16px + env(safe-area-inset-bottom)); }
+  .cap .r { display: none; }   /* no room for the click hint; tapping the slide still swaps it */
+  .six .tag { font-size: var(--sds-typography-scale-01); padding: var(--sds-size-space-100) var(--sds-size-space-200); }
+  .side { display: block; margin: 0 var(--sds-size-space-200) var(--sds-size-space-200); }
+  .side-top { padding: var(--sds-size-space-300) var(--sds-size-space-400) var(--sds-size-space-100); }
+  .side-body { overflow: visible; padding: var(--sds-size-space-200) var(--sds-size-space-400) var(--sds-size-space-400); }
+  .side-foot { padding: var(--sds-size-space-300) var(--sds-size-space-400) calc(var(--sds-size-space-400) + env(safe-area-inset-bottom)); }
   .thumbs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }   /* one row that scrolls sideways */
-  .thumb { width: 64px; flex: none; font-size: 11px; }
-  .thumb { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .thumb { width: 64px; flex: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .more { display: none; }
-  .strip { padding: 8px 12px; }
-  .chip { width: 60px; }
+  .strip { padding: var(--sds-size-space-200) var(--sds-size-space-300); }
 }
-/* ---------- draft: approve as you go ---------- */
-.cmt.locked .tap { pointer-events: none; }
-.cmt.locked .claude > .note { display: none; }
-.state-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 14px; color: var(--slate); margin: 0; }
-.state-line b { color: var(--ink); font-weight: 500; }
-.state-line .spin { margin-right: 0; color: var(--pencil); }
-.ok { color: var(--done); font-weight: 600; }
-/* a finished slide: faded back, outlined green, with a check */
-.chip .mk.done { top: 4px; right: 4px; width: 16px; height: 16px; box-shadow: none; background: var(--done) url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27%230A0A0A%27%20stroke-width%3D%273.5%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M5%2012.5l4.5%204.5L19%207.5%27/%3E%3C/svg%3E") center / 10px 10px no-repeat; }
-.chip:has(.mk.done) img { opacity: .35; box-shadow: 0 0 0 2px var(--done); }
-.chip:has(.mk.done):hover img { opacity: .6; }
-.chip[aria-current="true"]:has(.mk.done) img { opacity: 1; }
-.chip .mk.work { background: var(--pencil); }
-.revised { font-size: 13px; color: var(--pencil); margin: 0; }
-.act .note { margin: 0; }
-.thread { display: grid; gap: 12px; padding: 12px 14px 14px; border-radius: 14px 14px 14px 4px; background: rgba(255, 255, 255, .055); }
-.msg-head .span { font-size: 12px; }
-.who-row { display: flex; align-items: baseline; gap: 10px; justify-content: flex-end; }
-.was { display: block; font-size: 13px; color: var(--slate); margin-bottom: 2px; }
-.redline li.editing textarea { cursor: text; }
-/* the reply box lines up with the wording boxes instead of hanging out past the column */
-/* your reply: laid out like a reviewer's comment, with the bubble's point on your side (bottom right) */
-.msg.out .msg-body > p.msg-sub { margin: 6px 0 0; font-size: 12px; color: var(--slate); }
-.msg.out .msg-body > p:not(.msg-head):not(.msg-sub) { margin: 2px 0 0; font: 400 15px/1.5 var(--sans); color: var(--ink); }
-.av.me { background: var(--chip); box-shadow: 0 0 0 1px rgba(255, 255, 255, .14); font-size: 9.5px; letter-spacing: 0; }
-.also { margin-top: 4px; }
-/* the reply header sits inside .also / .reply, whose paragraph rules (serif, top margin) were pushing it down */
-.msg-head { display: flex; flex-wrap: wrap; gap: 2px 8px; font-size: 13px; color: var(--slate); margin: 0; min-height: 28px; align-items: center; }
-.av.photo { object-fit: cover; padding: 0; background: var(--chip); }
-.why summary, .also summary { cursor: pointer; width: max-content; font-weight: 500; }
-.why p { margin-top: 8px; }
-/* ---------- comment bubbles, after Figma's: a raised card with soft depth, one square corner on the speaker's side ---------- */
-.cmt > .thread, .thread.me { gap: 10px; padding: 14px 16px 16px; border: 0; }
-.cmt > .thread { margin-right: 40px; margin: 0 32px 0 0; border-radius: 22px 22px 22px 3px; background: var(--raise); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), 0 0 0 .5px rgba(255, 255, 255, .08), 0 1px 2px rgba(0, 0, 0, .35), 0 6px 16px rgba(0, 0, 0, .32); }
-.thread.me { margin-right: 0; margin-left: 16px; margin: 0 0 0 32px; border-radius: 22px 22px 3px 22px; background: var(--mine); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .09), 0 0 0 .5px rgba(120, 165, 255, .22), 0 1px 2px rgba(0, 0, 0, .35), 0 6px 16px rgba(0, 0, 0, .32); }
-.cmt.many .thread { background: var(--raise); }
-.msg { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: 12px; }
-.av { display: grid; place-items: center; border-radius: 50%; font-weight: 600; color: #fff; letter-spacing: .02em; width: 32px; height: 32px; font-size: 12px; }
-.av.sm { width: 28px; height: 28px; font-size: 11px; }
-.thread .msg-head, .also .thread .msg-head, .reply .thread .msg-head { margin: 0; font: 400 13px/1.4 var(--sans); align-items: center; min-height: 32px; font-size: 13px; }
-.msg-head b { color: var(--ink); font-weight: 500; font-size: 15px; }
-.msg-text { margin: 2px 0 0; color: var(--ink); margin-top: 1px; font-size: 15px; line-height: 1.45; }
-.msg.in-reply { padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, .07); border-top-color: rgba(255, 255, 255, .08); }
-/* Generate sits inside the reply box, bottom left, as a quiet text action; the box is one field with one focus ring */
-.composer { position: relative; margin-top: 8px; border: 1px solid rgba(140, 180, 255, .2); border-radius: 12px; background: var(--mine-field); transition: border-color .15s, box-shadow .15s; }
-.composer:hover { border-color: rgba(140, 180, 255, .34); }
-.composer:focus-within { border-color: var(--pencil); box-shadow: 0 0 0 3px rgba(76, 141, 255, .28); }
-.composer textarea.field, .thread.me .composer textarea.field { margin: 0; border: 0; background: transparent; box-shadow: none; }
-.composer textarea.field:focus { box-shadow: none; }
-.composer .gen { position: absolute; left: 6px; bottom: 6px; margin: 0; padding: 6px 8px; border-radius: 8px; background: transparent; box-shadow: none; color: var(--pencil-text); font: 500 13px/1 var(--sans); }
-.composer .gen:hover { background: rgba(76, 141, 255, .14); color: var(--pencil-text-hover); }
-.composer .gen.busy { color: var(--slate); background: transparent; animation: genpulse 1.2s ease-in-out infinite; }
-@keyframes genpulse { 50% { opacity: .45; } }
-@media (prefers-reduced-motion: reduce) { .composer .gen.busy { animation: none; } }
-/* ---------- buttons, raised like the comment cards: a lit top edge, a hairline rim, a soft shadow underneath; they press down when clicked ---------- */
-:root { --canvas: #0A0A0A; --sheet: #262628; --well: #18181A; --well-hover: #1E1E20; --raise: #2C2C2E; --raise-hover: #333336; --chip: #3A3A3E;
-  --ink: #F2F2F2; --slate: #9D9DA3; --muted: #8A8A90; --faint: #75757C;
-  --pencil: #4C8DFF; --pencil-hover: #5C98FF; --pencil-press: #4382F0; --pencil-text: #8DB5FF; --pencil-text-hover: #B3CCFF; --mine: #26334D; --mine-field: #1B2335; --done: #3DD68C; --line: rgba(255, 255, 255, .12); --pencil-wash: rgba(76, 141, 255, .16); --on-pencil: var(--canvas); --on-ink: var(--canvas); --edge: rgba(255, 255, 255, .08); --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif; --serif: var(--sans); color-scheme: dark; --lift: inset 0 1px 0 rgba(255, 255, 255, .08), 0 0 0 .5px rgba(255, 255, 255, .12), 0 1px 2px rgba(0, 0, 0, .4), 0 3px 8px rgba(0, 0, 0, .28); --lift-hover: inset 0 1px 0 rgba(255, 255, 255, .1), 0 0 0 .5px rgba(255, 255, 255, .16), 0 2px 3px rgba(0, 0, 0, .4), 0 6px 14px rgba(0, 0, 0, .32); --pressed: inset 0 1px 2px rgba(0, 0, 0, .45), 0 0 0 .5px rgba(255, 255, 255, .1); }
-.btn, .cap-btn, .pill-btn, .step, .opt, .add-reply, .thumb.all .tile { border: 0; background: var(--raise); color: var(--ink); box-shadow: var(--lift); transition: background .15s, box-shadow .15s, transform .08s; }
-.btn, .opt, .add-reply { border-radius: 12px; }
-.cap-btn, .pill-btn, .step { border-radius: 10px; }
-.btn:hover, .cap-btn:hover, .pill-btn:hover, .step:hover:not(:disabled), .opt:hover, .add-reply:hover, .thumb.all:hover .tile { background: var(--raise-hover); box-shadow: var(--lift-hover); }
-.btn:active, .cap-btn:active, .pill-btn:active, .step:active:not(:disabled), .opt:active, .add-reply:active, .thumb.all:active .tile { transform: translateY(1px); box-shadow: var(--pressed); }
-.step:disabled { opacity: .35; cursor: default; box-shadow: 0 0 0 .5px rgba(255, 255, 255, .08); background: transparent; }
-.opt { cursor: pointer; font-size: 14px; text-align: left; padding: 9px 14px; font-weight: 500; }
-/* the main action: blue, lit from above */
-.btn.primary { border-color: var(--pencil); background: var(--pencil); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), inset 0 -1px 0 rgba(0, 0, 0, .18), 0 0 0 .5px rgba(30, 80, 190, .9), 0 1px 2px rgba(0, 0, 0, .4), 0 4px 12px rgba(76, 141, 255, .28); }
-.btn.primary:hover { background: var(--pencil-hover); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), inset 0 -1px 0 rgba(0, 0, 0, .18), 0 0 0 .5px rgba(30, 80, 190, .9), 0 2px 3px rgba(0, 0, 0, .4), 0 6px 16px rgba(76, 141, 255, .34); }
-.btn.primary:active { background: var(--pencil-press); box-shadow: inset 0 1px 3px rgba(0, 0, 0, .35), 0 0 0 .5px rgba(30, 80, 190, .9); }
-.go { width: 100%; font-size: 15px; font-weight: 700; border: 0; border-radius: 8px; padding: 12px 14px; min-height: 46px; background: var(--ink); color: var(--on-ink); cursor: pointer; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), 0 1px 2px rgba(0, 0, 0, .4), 0 4px 12px rgba(0, 0, 0, .3); transition: transform .08s, box-shadow .15s; }
-.go:active:not(:disabled) { transform: translateY(1px); box-shadow: inset 0 1px 3px rgba(0, 0, 0, .25); }
-/* the picked option takes the reply card's blue */
-.opt[aria-pressed="true"] { background: var(--mine); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .09), 0 0 0 1px var(--pencil), 0 1px 2px rgba(0, 0, 0, .4), 0 4px 12px rgba(76, 141, 255, .18); }
-/* Before / After: the track is pressed in, the knob sits up out of it */
-.pillsw { --p: 1; position: relative; display: grid; grid-template-columns: 1fr 1fr; width: 196px; height: 36px; padding: 3px; border-radius: 999px; touch-action: none; -webkit-user-select: none; user-select: none; cursor: pointer; background: var(--well); box-shadow: inset 0 1px 3px rgba(0, 0, 0, .55), inset 0 0 0 .5px rgba(0, 0, 0, .6), 0 0 0 .5px rgba(255, 255, 255, .1), 0 1px 0 rgba(255, 255, 255, .04); }
-.pillsw .knob { position: absolute; top: 3px; bottom: 3px; left: 3px; width: calc(50% - 3px); border-radius: 999px; transform: translateX(calc(var(--p) * 100%)); pointer-events: none; background: var(--ink); box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0, 0, 0, .1), 0 1px 2px rgba(0, 0, 0, .45), 0 3px 8px rgba(0, 0, 0, .35); }
-/* the labels on enlarged grid slides match */
-.fate { display: inline-flex; align-items: center; gap: 8px; margin: 0; padding: 7px 14px 7px 11px; border-radius: 999px; font-size: 14px; color: var(--ink); background: var(--raise); box-shadow: var(--lift); }
-@media (prefers-reduced-motion: reduce) { .btn:active, .cap-btn:active, .pill-btn:active, .step:active, .opt:active, .add-reply:active, .go:active { transform: none; } }
-/* who asked for it: the commenter's avatar pinned to the top-right corner of each outlined area */
-.add-reply { justify-self: start; width: max-content; }
-/* replies written after a comment is done */
-.thread.me.later { margin-top: 12px; }
-.act > .add-reply { margin-top: 12px; }
-/* reply after it's done: a slim Figma-style field */
-.rb-field:hover { box-shadow: inset 0 1px 2px rgba(0, 0, 0, .45), 0 0 0 .5px rgba(255, 255, 255, .22); }
-.rb-field:focus-within { box-shadow: inset 0 1px 2px rgba(0, 0, 0, .45), 0 0 0 1px var(--pencil), 0 0 0 4px rgba(76, 141, 255, .22); }
-.rb-field textarea { display: block; width: 100%; padding: 0 6px 0 0; border: 0; background: transparent; color: var(--ink); font: 400 15px/1.45 var(--sans); resize: none; field-sizing: content; min-height: 22px; max-height: 240px; outline: none; caret-color: var(--pencil); }
-.rb-field textarea::placeholder { color: var(--faint); }
-.rb-send { display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; cursor: pointer; background: var(--pencil); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 1px 2px rgba(0, 0, 0, .4); transition: background .15s, transform .08s; }
-.rb-send svg { width: 16px; height: 16px; }
-.rb-send:hover { background: var(--pencil-hover); }
-.rb-send:active { transform: translateY(1px); }
-.rb-field.empty .rb-send { background: var(--chip); color: var(--muted); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06); cursor: default; }
-.act > .rbar, .act > .thread.me.later { width: 100%; justify-self: stretch; align-self: stretch; }
-/* Draft with Claude, kept small: a quiet chip, and Tab in an empty reply does the same */
-.draft, .composer .gen.draft { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, .07); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05); color: var(--slate); font: 500 12px/1 var(--sans); cursor: pointer; transition: background .15s, color .15s; flex: none; }
-.draft:hover, .composer .gen.draft:hover { background: rgba(76, 141, 255, .16); color: var(--pencil-text-hover); }
-.draft.busy, .composer .gen.draft.busy { background: transparent; color: var(--slate); animation: genpulse 1.2s ease-in-out infinite; }
-.composer .gen.draft { left: 8px; bottom: 8px; }
-.composer.empty textarea.field { min-height: 92px; padding-bottom: 40px; }
-/* your bubble: the avatar sits in the top-right corner instead of taking a column, so the reply box spans the whole bubble */
-.msg.out { grid-template-columns: minmax(0, 1fr) auto; display: block; position: relative; }
-.msg.out > .av { order: 2; position: absolute; top: 0; right: 0; }
-.msg.out .msg-head { flex-wrap: nowrap; padding-right: 42px; }
-.msg.out.writing .msg-head { padding-right: 0; }   /* writing: photo left, × or bin right */
-.thread.me .composer { margin-top: 10px; }
-.thread.me textarea.field { background: var(--mine-field); border-color: rgba(140, 180, 255, .2); overflow-y: hidden; max-height: none; }
-/* Figma-style comment pin: a dark round badge with the commenter's avatar and one sharp corner.
-   It sits just outside the outline's top-right corner, its point touching the corner, so it never covers what's outlined. */
-.stage > img { border-radius: inherit; }
-.hl-who { position: absolute; display: block; z-index: 1; top: auto; right: auto; left: 100%; bottom: 100%; transform: translate(-2px, 2px); padding: 3px; border-radius: 50% 50% 50% 0; background: var(--well-hover); box-shadow: 0 0 0 1px rgba(255, 255, 255, .14), 0 2px 4px rgba(0, 0, 0, .45), 0 6px 14px rgba(0, 0, 0, .35); }
-.hl-who .av { display: grid; width: 26px; height: 26px; font-size: 10px; box-shadow: none; }
-/* reply field spacing: one 8px inset all round, text centred on the 28px buttons, avatar lined up with the field's bottom row */
-.rbar { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; margin-top: 14px; align-items: end; }
-.rbar > .av { margin-top: 4px; margin: 0 0 6px; }
-/* (44px field − 32px avatar) ÷ 2 */
-.rb-field { border-radius: 18px; background: var(--well-hover); box-shadow: inset 0 1px 2px rgba(0, 0, 0, .45), 0 0 0 .5px rgba(255, 255, 255, .12); transition: box-shadow .15s; padding: 8px 8px 8px 16px; }
-.rb-row { display: flex; align-items: flex-end; gap: 6px; }
-.rbar > .icon-btn { margin: 0 0 4px 2px; align-self: flex-end; flex: none; }   /* × closes a follow-up reply box */
-.rb-row textarea { flex: 1; padding: 3px 0; min-height: 28px; line-height: 22px; }
-.rb-row .draft { height: 28px; padding: 0 11px; }
-/* ---------- polish: one weight for emphasis, nothing under 12px for labels, one corner scale ---------- */
-.btn, .btn.primary, .opt, .go, .add-reply, .cap-btn, .pill-btn { font-weight: 500; }
-.six figcaption b, .six figcaption span, .six .plus figcaption span, .thumb[aria-pressed="true"], .chip[aria-current="true"], .on-slide, .state, .label { font-weight: 500; }
-.six .cut figcaption span { text-decoration: none; }
-.av, .av.sm, .count { font-weight: 500; }
-.side-foot b, .tally b, .seen b, .link, .link.quiet { font-weight: 500; }
-.chip { flex: none; position: relative; width: 76px; padding: 0; border: 0; background: none; cursor: pointer; display: grid; gap: 3px; color: var(--slate); text-align: left; font-size: 12px; }
-.count { display: inline-grid; place-items: center; padding: 0 4px; font-weight: 700; color: var(--ink); background: rgba(255, 255, 255, .14); min-width: 18px; height: 18px; font-size: 11px; border-radius: 9px; }
-.btn, .opt, .add-reply, .cap-btn, .pill-btn, .step, textarea.field, .composer, .box textarea { border-radius: 12px; }
-.stage { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; padding: 0; border: 0; background: #fff; cursor: pointer; touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; box-shadow: 0 0 0 1px rgba(255, 255, 255, .08); overflow: visible; border-radius: 10px; }
-.thumb img, .six img, .chip img, .thumb.all .tile { border-radius: 6px; }
 </style>
 </head>
 <body>
@@ -416,6 +444,7 @@ ins { text-decoration: none; background: var(--pencil-wash); color: var(--ink); 
       <p class="pill-pos" aria-live="polite"><b id="posW">Slide 1</b><span id="posT"></span></p>
       <a class="pill-btn" id="deckLink" href="#" target="_blank" rel="noopener">Open in Figma</a>
     </header>
+    <p class="toast" id="toast" role="status" aria-live="polite"></p>
     <div class="scroller" id="scroller" tabindex="-1"></div>
     <nav class="strip" id="strip" aria-label="Jump to a comment"></nav>
   </section>
@@ -488,6 +517,13 @@ function dropStale() {
 }
 const zoom = {};         // option card id -> slide number shown big from the grid
 const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+let toastT = 0;
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("on");
+  clearTimeout(toastT);
+  toastT = setTimeout(() => { t.classList.remove("on"); toastT = setTimeout(() => { t.textContent = ""; }, 200); }, 2200);
+}
 const EASE = "cubic-bezier(.2, .8, .2, 1)";
 function fly(node, a, b) {
   node.animate([{ transformOrigin: "0 0", transform: `translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width})`, zIndex: 5 },
@@ -757,11 +793,16 @@ function laterHTML(c) {
   /* Same as before a card is decided: a "Reply to Tom" button, and the reply box only once you ask for it */
   if (!laterOpen.has(c.id) && empty && !drafting.has(`${c.id}:later`))
     return `${sent}<button type="button" class="add-reply" data-act="openlater" data-id="${c.id}">${ICON.reply}Reply to ${who}</button>`;
-  /* one slim field, like Figma's reply box: your avatar, the text, and a round send button; Draft sits in it while it's empty */
-  return `${sent}<div class="rbar">${meAv()}<div class="rb-field${empty ? " empty" : ""}">
-    <div class="rb-row"><textarea rows="1" data-later="${c.id}" placeholder="Reply to ${who}" aria-label="Reply to ${who}">${esc(t)}</textarea>
-    ${empty ? draftBtn(c, "later", "draft") : ""}<button type="button" class="rb-send" data-act="postlater" data-id="${c.id}" aria-label="Post your reply to ${who}">${ICON.up}</button></div>
-  </div><button type="button" class="icon-btn" data-act="closelater" data-id="${c.id}" aria-label="Close the reply to ${who}" title="Close">${ICON.close}</button></div>`;
+  /* The same reply box as on an open card: your photo, × (the bin once there's text), and the field with Ask Claude in it.
+     The one extra is the send button, because a reply to a done comment has no Approve to go out with. */
+  const shut = empty
+    ? `<button type="button" class="icon-btn" data-act="closelater" data-id="${c.id}" aria-label="Close the reply to ${who}" title="Close">${ICON.close}</button>`
+    : `<button type="button" class="icon-btn" data-act="closelater" data-id="${c.id}" aria-label="Delete your reply to ${who}" title="Delete this reply">${ICON.trash}</button>`;
+  const rows = Math.min(10, Math.max(3, Math.ceil(t.length / 34)));
+  return `${sent}<div class="thread me later-box"><div class="msg out writing"><div class="msg-body"><p class="msg-head">${meAv()}${shut}</p>
+    <div class="composer sends${empty ? " empty" : ""}"><textarea class="field" rows="${rows}" data-later="${c.id}" placeholder="Reply to ${who}" aria-label="Reply to ${who}">${esc(t)}</textarea>
+    ${empty ? draftBtn(c, "later", "gen draft") : ""}<button type="button" class="send" data-act="postlater" data-id="${c.id}" aria-label="Post your reply to ${who}"${empty ? " disabled" : ""}>${ICON.up}</button></div>
+  </div></div></div>`;
 }
 function focusLater(c) { const t = document.querySelector(`textarea[data-later="${c.id}"]`); if (t) { t.focus(); t.setSelectionRange(t.value.length, t.value.length); } }
 function postLater(c) {
@@ -823,11 +864,10 @@ function claudeHTML(c) {
     ${c.redline ? `<ul class="redline">${c.redline.map((l, j) => c.edit ? tapLine(c, j, safeHTML(l)) : `<li>${safeHTML(l)}</li>`).join("")}</ul>` : ""}
     ${also}${why}</div>`;
 }
-const AV = ["#5B8DEF", "#E07A5F", "#3FB27F", "#A77BDB", "#D6A13A"];
 function avHTML(k, small) {
   const name = PEOPLE[k] || k, ini = name.split(" ").map(w => w[0]).slice(0, 2).join("");
   const n = Math.max(0, Object.keys(PEOPLE).indexOf(k));
-  return `<span class="av${small ? " sm" : ""}" style="background:${AV[n % AV.length]}" aria-hidden="true">${esc(ini)}</span>`;
+  return `<span class="av c${n % 5}${small ? " sm" : ""}" aria-hidden="true">${esc(ini)}</span>`;
 }
 function msgHTML(k, text, where, reply) {
   return `<div class="msg${reply ? " in-reply" : ""}">${avHTML(k, reply)}<div class="msg-body"><p class="msg-head"><b>${esc(PEOPLE[k] || k)}</b>${where}</p><p class="msg-text">${esc(text)}</p></div></div>`;
@@ -942,8 +982,8 @@ async function init() {
   document.title = `${DATA.deck.title} · Blueline`;
   document.getElementById("deckTitle").textContent = DATA.deck.title;
   const link = document.getElementById("deckLink");
-  /* With no deck link (the public demo) the button still shows, but goes nowhere */
-  if (DECK) link.href = DECK; else { link.removeAttribute("target"); link.addEventListener("click", e => e.preventDefault()); }
+  /* With no deck link (the public demo) the button still shows, and says why it goes nowhere */
+  if (DECK) link.href = DECK; else { link.removeAttribute("target"); link.addEventListener("click", e => { e.preventDefault(); toast("Not available for demo."); }); }
   group();
   /* A static demo (data.json says "demo": true) has no server to ask, so it doesn't try */
   if (!DATA.demo) try { const r = await fetch("api/status", { cache: "no-store" }); if (r.ok) { LIVE = true; fromServer(await r.json()); } } catch (e) {}
@@ -1221,7 +1261,7 @@ document.addEventListener("click", e => {
         drafting.set(`${c.id}:${kind}`, -1); renderSide();
         send(c, { act: "draft", for: kind }).then(n => { if (n == null) drafting.delete(`${c.id}:${kind}`); else if (drafting.get(`${c.id}:${kind}`) === -1) drafting.set(`${c.id}:${kind}`, n); lastSeen = ""; poll(); keepFocus(refresh); });
       } else {
-        a.disabled = true; a.textContent = "Drafting…"; a.classList.add("busy");
+        a.disabled = true; a.textContent = "Asking Claude…"; a.classList.add("busy");
         if (kind === "later") setTimeout(() => { laterDraft.set(c.id, c.reply && !hasReply(c) ? c.reply : standIn(c)); renderSide(); focusLater(c); }, 900);
         else setTimeout(() => { const t = standIn(c); genText.set(c.id, t); setReply(c, t); replyOpen.add(c.id); save(); renderSide(); focusReply(c); }, 900);
       }
@@ -1247,7 +1287,7 @@ document.addEventListener("click", e => {
 });
 document.addEventListener("input", e => {
   if (e.target.dataset && e.target.dataset.later != null) {
-    const c = byId(e.target.dataset.later), v = e.target.value, box = e.target.closest(".rb-field");
+    const c = byId(e.target.dataset.later), v = e.target.value, box = e.target.closest(".composer");
     laterDraft.set(c.id, v);
     if (box && box.classList.contains("empty") === !!v.trim()) { const pos = e.target.selectionStart; renderSide(); const t = document.querySelector(`textarea[data-later="${c.id}"]`); if (t) { t.focus(); t.setSelectionRange(pos, pos); } }
     return;
@@ -1269,10 +1309,10 @@ document.addEventListener("input", e => {
 
 /* Reply boxes grow with their text in every browser (field-sizing isn't everywhere yet), so there's never an inner scrollbar */
 function fit(t) { t.style.height = "auto"; t.style.height = t.scrollHeight + (t.offsetHeight - t.clientHeight) + "px"; }   /* add back only the border it actually has */
-document.addEventListener("input", e => { if (e.target.matches && e.target.matches("textarea.field, .rb-field textarea")) fit(e.target); });
+document.addEventListener("input", e => { if (e.target.matches && e.target.matches("textarea.field")) fit(e.target); });
 /* "Drafted by Claude" drops off the moment you change the wording, and comes back if you type it back to Claude's */
 document.addEventListener("input", e => { const k = e.target.dataset && e.target.dataset.live; if (!k || !k.endsWith(":r")) return; const sub = e.target.closest(".msg-body")?.querySelector(".msg-sub"); if (sub) sub.hidden = !byClaude(byId(k.split(":")[0])); });
-const fitAll = () => document.querySelectorAll("#sideBody textarea.field, #sideBody .rb-field textarea").forEach(fit);
+const fitAll = () => document.querySelectorAll("#sideBody textarea.field").forEach(fit);
 new MutationObserver(fitAll).observe(document.getElementById("sideBody"), { childList: true, subtree: true });
 new ResizeObserver(fitAll).observe(document.getElementById("sideBody"));   // the panel's width settles after fonts load
 if (document.fonts) document.fonts.ready.then(fitAll);

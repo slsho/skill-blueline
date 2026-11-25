@@ -69,7 +69,8 @@ skills/blueline/
   scripts/fetch_comments.py   reads comment threads from Figma
   scripts/post_replies.py     posts approved replies into their threads
   scripts/diffboxes.py        finds what changed between two slide images
-  references/                 data format and tested Figma edit recipes
+  scripts/check_design_system.py  checks the page uses only Simple Design System tokens
+  references/                 data format, tested Figma edit recipes, and the SDS tokens
 docs/                         the demo (static, no server)
 assets/                       the screenshot at the top of this README
 tests/                        automated tests
@@ -82,7 +83,11 @@ python3 -m unittest discover -s tests -v
 ```
 
 They cover the Figma scripts (with Figma's API faked), the review server, the outline finder,
-and the demo data. The page itself and the Figma edits were tested by running a full round on
+and the demo data. They also hold the review page to Figma's
+[Simple Design System](https://www.figma.com/design/ABQ7Itjmi2WuD6YJ3suoOE/Simple-Design-System--Community-):
+every colour, space, corner, stroke and type size on the page must be an SDS token, so a raw value
+added later fails the tests with its line number. Run the check on its own with
+`python3 skills/blueline/scripts/check_design_system.py`. The page itself and the Figma edits were tested by running a full round on
 a duplicate deck.
 
 ## Privacy
