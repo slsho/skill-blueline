@@ -1,0 +1,11 @@
+{
+  "name": "blueline",
+  "owner": { "name": "slsho" },
+  "plugins": [
+    {
+      "name": "blueline",
+      "source": "./",
+      "description": "Reviewer comments on a Figma Slides deck in, approved changes out."
+    }
+  ]
+}

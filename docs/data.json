@@ -1,0 +1,381 @@
+{
+ "demo": true,
+ "deck": {
+  "title": "Ecosystem mapping playbook",
+  "url": "",
+  "round": "Review round 1",
+  "slides": 19
+ },
+ "people": {
+  "dana": "Dana Whitfield",
+  "marcus": "Marcus Lee",
+  "priya": "Priya Natarajan",
+  "tom": "Tom Becker",
+  "owner": "Deck owner"
+ },
+ "highlights": {
+  "after-02": [
+   [
+    69.4,
+    22.8,
+    30.6,
+    54.4
+   ]
+  ],
+  "after-14-s2": [
+   [
+    3.8,
+    32.3,
+    3.4,
+    4.4
+   ],
+   [
+    3.8,
+    52.3,
+    3.7,
+    4.4
+   ],
+   [
+    3.8,
+    72.3,
+    3.7,
+    4.4
+   ]
+  ],
+  "after-14-s2-zoom": [
+   [
+    7.7,
+    6.7,
+    7.3,
+    12.9
+   ],
+   [
+    7.7,
+    43.5,
+    7.3,
+    13.1
+   ],
+   [
+    7.7,
+    80.4,
+    7.3,
+    13.1
+   ]
+  ],
+  "after-14-s10": [
+   [
+    6.0,
+    35.6,
+    3.4,
+    4.4
+   ],
+   [
+    24.7,
+    35.6,
+    3.4,
+    4.4
+   ],
+   [
+    43.5,
+    35.6,
+    3.4,
+    4.4
+   ],
+   [
+    61.9,
+    35.6,
+    3.7,
+    4.4
+   ],
+   [
+    80.7,
+    35.6,
+    3.4,
+    4.4
+   ]
+  ],
+  "after-05-s5": [
+   [
+    62.2,
+    11.2,
+    32.1,
+    7.1
+   ],
+   [
+    23.1,
+    56.2,
+    8.4,
+    4.9
+   ]
+  ],
+  "after-05-s10": [
+   [
+    43.5,
+    58.4,
+    12.8,
+    11.0
+   ]
+  ],
+  "after-08": [
+   [
+    24.7,
+    67.3,
+    13.1,
+    14.4
+   ]
+  ]
+ },
+ "cards": [
+  {
+   "id": 2,
+   "slide": 1,
+   "kind": "change",
+   "where": "Slide 1",
+   "who": "marcus",
+   "comment": "Cover is all text. Could we put a simple ring map graphic on the right? Light lines, nothing loud.",
+   "change": "Added the ring map to the right side of the cover, in thin grey lines.",
+   "why": "No orange, because the small label above the title already uses it. Dana's comment on this slide is probably about the same thing.",
+   "shots": [
+    [
+     "before-01",
+     "after-02",
+     "Slide 1"
+    ]
+   ],
+   "apply": "Slide 1: draw three concentric circles (thin grey strokes, no fill) and a few small node dots in the right ~40% of the slide, vertically centred, behind nothing. Match the deck's grey."
+  },
+  {
+   "id": 1,
+   "slide": 1,
+   "kind": "reply",
+   "where": "Slide 1",
+   "who": "dana",
+   "image": "before-01",
+   "comment": "Hmm, not loving the cover. Can we rethink?",
+   "why": "Too vague to redesign from. Marcus's comment on the same slide is the likeliest reason, so Claude asks first.",
+   "reply": "Is it that the cover is all text? Marcus suggested adding a ring map graphic. Want me to try that, or is it something else, like the title?"
+  },
+  {
+   "id": 14,
+   "slide": 2,
+   "kind": "change",
+   "where": "10 slides",
+   "who": "owner",
+   "short": "Circle numbers centred",
+   "alsoOn": [
+    3,
+    6,
+    8,
+    10,
+    11,
+    12,
+    14,
+    15,
+    19
+   ],
+   "comment": "all number spacing is off",
+   "change": "Centred the number in every circle. That's 36 circles on 10 slides.",
+   "why": "The PowerPoint import left the numbers left-aligned. Only the alignment changes; nothing moves or resizes.",
+   "shots": [
+    [
+     "before-02-zoom",
+     "after-14-s2-zoom",
+     "Slide 2, close-up"
+    ],
+    [
+     "before-02",
+     "after-14-s2",
+     "Slide 2"
+    ],
+    [
+     "before-10",
+     "after-14-s10",
+     "Slide 10"
+    ]
+   ],
+   "more": "+ slides 3, 6, 8, 11, 12, 14, 15 and 19",
+   "apply": "Every slide: a TEXT node that is only a number (or '!') and has the same box as an ELLIPSE beside it: textAlignHorizontal = CENTER, textAlignVertical = CENTER. Footer page numbers have no circle and stay as they are."
+  },
+  {
+   "id": 4,
+   "slide": 4,
+   "kind": "pick",
+   "where": "Slides 4 to 9",
+   "who": "tom",
+   "comment": "Slides 5-9 repeat what's already on this overview. The deck is 19 slides, can we cut them and keep just this one?",
+   "replyFrom": [
+    "dana",
+    "Disagree. The Why slide is the one leaders actually read. Keep it, and ideally add a real before/after example to it."
+   ],
+   "change": "Tom and Dana disagree. Claude suggests the middle option. Pick another if you'd rather.",
+   "why": "At the kickoff, Tom asked to keep playbooks under 15 slides. Option C lands on exactly 15.",
+   "range": [
+    [
+     4,
+     "before-04"
+    ],
+    [
+     5,
+     "before-05"
+    ],
+    [
+     6,
+     "before-06"
+    ],
+    [
+     7,
+     "before-07"
+    ],
+    [
+     8,
+     "before-08"
+    ],
+    [
+     9,
+     "before-09"
+    ]
+   ],
+   "options": [
+    {
+     "key": "A",
+     "name": "Tom's cut",
+     "count": "14 slides",
+     "desc": "Remove slides 5 to 9. Keep the overview.",
+     "strip": {
+      "4": "",
+      "5": "cut",
+      "6": "cut",
+      "7": "cut",
+      "8": "cut",
+      "9": "cut"
+     }
+    },
+    {
+     "key": "B",
+     "name": "Dana's keep",
+     "count": "19 slides",
+     "desc": "No cuts. Add a before/after example to the Why slide.",
+     "strip": {
+      "4": "",
+      "5": "",
+      "6": "plus",
+      "7": "",
+      "8": "",
+      "9": ""
+     }
+    },
+    {
+     "key": "C",
+     "name": "Middle",
+     "count": "15 slides",
+     "desc": "Fold What, Who, When and Where into the overview. Keep Why as its own slide, with Dana's example.",
+     "strip": {
+      "4": "plus",
+      "5": "fold",
+      "6": "plus",
+      "7": "fold",
+      "8": "fold",
+      "9": "fold"
+     },
+     "images": {
+      "4": "after-04-c",
+      "6": "after-06-c"
+     }
+    }
+   ],
+   "pick": "C",
+   "apply": "Option C. Slide 4: under each body text, after a blank line, in Inter Regular 24 slate (#5B6675): What: 'Not a journey map or an org chart.' Who: 'Used by product leads, engineers and partners.' When: 'Also before a new market or partner.' Where: 'Evidence: interviews, contracts, support tickets.' Slide 6: one line at x 86, y 940, width 1747, Inter 22: 'EXAMPLE' in Bold signal orange, then 'A clinic rebuilt booking for patients and broke it for caregivers, who book most visits. Mapping first puts them in the room.' in ink. Mark slides 5, 7, 8 and 9 as skipped (never delete). Option A: skip 5 to 9. Option B: only the slide 6 line."
+  },
+  {
+   "id": 5,
+   "slide": 5,
+   "kind": "change",
+   "where": "Slides 5 and 10",
+   "who": "priya",
+   "short": "\"Core user\" wording",
+   "alsoOn": [
+    10
+   ],
+   "comment": "We keep switching between \"your user\", \"the user\" and \"core user\". Let's say \"core user\" everywhere.",
+   "change": "\"Core user\" in all three places.",
+   "redline": [
+    "<span class=\"ctx\">Slide 5 title</span>around <del>your user</del> <ins>the core user</ins>",
+    "<span class=\"ctx\">Slide 5 map</span><del>Your user</del> <ins>Core user</ins>",
+    "<span class=\"ctx\">Slide 10, step 3</span>touch <del>the user</del> <ins>the core user</ins>"
+   ],
+   "edit": [
+    {
+     "ctx": "Slide 5 title",
+     "after": "around the core user",
+     "find": "around your user"
+    },
+    {
+     "ctx": "Slide 5 map",
+     "after": "Core user",
+     "find": "Your user"
+    },
+    {
+     "ctx": "Slide 10, step 3",
+     "after": "touch the core user",
+     "find": "touch the user"
+    }
+   ],
+   "why": "\"End user\" on slide 6 stays. It means the person using the product as opposed to the buyer, so changing it would change the meaning.",
+   "shots": [
+    [
+     "before-05",
+     "after-05-s5",
+     "Slide 5"
+    ],
+    [
+     "before-10",
+     "after-05-s10",
+     "Slide 10"
+    ]
+   ],
+   "apply": "Replace each 'find' phrase with its 'after' text on the slide named in ctx, keeping the surrounding text and style."
+  },
+  {
+   "id": 8,
+   "slide": 10,
+   "kind": "change",
+   "where": "Slide 10",
+   "who": "tom",
+   "comment": "Where does \"aim for 20 or more\" come from?",
+   "change": "Answered Tom, and the slide now says what to cut down to.",
+   "redline": [
+    "Aim for 20 or more, then cut<ins> to the 10–12 that shape the experience most</ins>."
+   ],
+   "edit": [
+    {
+     "after": "Aim for 20 or more, then cut to the 10–12 that shape the experience most.",
+     "find": "Aim for 20 or more, then cut."
+    }
+   ],
+   "why": "Sam at the kickoff: the useful maps started with 20 to 30 actors, then cut to the 10 or 12 that shape the experience.",
+   "reply": "It's from the kickoff workshop. Sam said the useful maps all started with 20 to 30 actors on the wall, then got cut to the 10 or 12 that shape the experience. I've added the 10 to 12 to the slide.",
+   "shots": [
+    [
+     "before-10",
+     "after-08",
+     "Slide 10"
+    ]
+   ],
+   "apply": "Slide 10, step 2 body text: replace the 'find' sentence with 'after'."
+  },
+  {
+   "id": 10,
+   "slide": 14,
+   "kind": "reply",
+   "where": "Slide 14",
+   "who": "marcus",
+   "image": "before-14",
+   "comment": "Change the \"!\" circle to red so it reads as a warning.",
+   "why": "Red isn't in the Signal palette, and the legend on this slide already defines the orange \"!\" as a pain point. Adding red would change every deck that uses the system.",
+   "reply": "Red isn't in our palette, and the legend on this slide already defines the orange \"!\" as a pain point, so I'd keep orange. If you want a separate warning colour, we'd add a red token to the design system, which changes every deck that uses it. Should I propose it?"
+  }
+ ],
+ "me": {
+  "name": "Deck owner"
+ }
+}

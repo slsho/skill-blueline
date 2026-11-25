@@ -1,0 +1,1281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Blueline review</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Crect width='20' height='20' rx='5' fill='%230A0A0A'/%3E%3Cpath d='M4.5 5.5h11v7.5h-6l-3.5 2.5v-2.5h-1.5z' fill='none' stroke='%234C8DFF' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+<style>
+/* v3: the slide fills the screen, one comment at a time. Scroll down for the next comment.
+   The sidebar holds that comment, Claude's change, Edit / Not quite, and the approve panel at the bottom. */
+/* Dark only, in the style of a portfolio "feedback mode": black canvas in a rounded window,
+   a flat grey comments panel, one blue for links and focus; blue dashes only for what changed on the slide. One sans throughout. */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+h1, h2, h3, p { margin: 0; }
+button, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--pencil); outline-offset: 3px; border-radius: 3px; }
+/* ---------- frame ---------- */
+.top { grid-column: 1 / -1; display: flex; align-items: center; gap: 16px; padding: 10px 20px; border-bottom: 1px solid var(--line); background: var(--sheet); }
+.top h1 { font-size: 15px; font-weight: 700; margin-right: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.top h1 span { font-weight: 400; color: var(--slate); }
+.top .pos { font-size: 14px; color: var(--slate); white-space: nowrap; }
+.top .pos b { color: var(--ink); }
+@media (max-width: 1100px) { .hint-keys { display: none; } }
+/* ---------- canvas: the slides ---------- */
+.scroller { overflow-y: auto; scroll-snap-type: y mandatory; overscroll-behavior: contain; scrollbar-width: none; }
+.scroller::-webkit-scrollbar { display: none; }
+@media (prefers-reduced-motion: no-preference) { .scroller { scroll-behavior: smooth; } }
+.stage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+.stage .now { opacity: 0; }
+/* The state label sits above the slide, so nothing covers the slide itself */
+.stage.is-now .now { opacity: 1; }
+.stage.still { cursor: default; }
+@media (prefers-reduced-motion: no-preference) { .stage .now { transition: opacity .14s ease; } }
+.cap .r { margin-left: auto; }
+.thumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.thumb { padding: 0; border: 0; background: none; cursor: pointer; display: grid; gap: 3px; width: 96px; text-align: left; font-size: 12px; color: var(--slate); }
+.thumb img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 3px; box-shadow: 0 0 0 1px var(--edge); display: block; background: #fff; }
+.thumb[aria-pressed="true"] img { box-shadow: 0 0 0 2px var(--pencil); }
+.thumb[aria-pressed="true"] { color: var(--pencil); font-weight: 700; }
+.more { font-size: 13px; color: var(--slate); }
+.six { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.six figure { margin: 0; display: grid; gap: 4px; }
+.six img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 4px; display: block; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .12), 0 6px 18px rgba(0, 0, 0, .1); }
+.six figcaption { font-size: 13px; color: var(--slate); }
+.six figcaption b { color: var(--ink); }
+.six .cut img, .six .fold img { opacity: .3; filter: grayscale(1); }
+.six .plus img { box-shadow: 0 0 0 3px var(--pencil); }
+.six .plus figcaption span { color: var(--pencil); font-weight: 700; }
+/* ---------- strip: one thumbnail per comment ---------- */
+.chip:hover img { opacity: 1; }
+.chip[aria-current="true"] img { opacity: 1; box-shadow: 0 0 0 2px var(--pencil); }
+.chip[aria-current="true"] { color: var(--pencil); font-weight: 700; }
+.chip .mk { position: absolute; top: 3px; right: 3px; width: 9px; height: 9px; border-radius: 50%; box-shadow: 0 0 0 1.5px #fff; }
+.chip .mk.back { background: var(--pencil); }
+.chip .mk.edit { background: #F0B000; }
+.chip .mk.skip { background: var(--muted); }
+.chip-n { display: inline-flex; align-items: center; gap: 5px; }
+.chip[aria-current="true"] .count { background: var(--pencil); color: var(--on-pencil); }
+/* ---------- several comments on one slide ---------- */
+.cmt { display: grid; gap: 12px; }
+/* A comment you're not on: the reviewer's words, then one line saying where it stands. The whole line opens it. */
+.cmt-sum { display: flex; align-items: center; gap: 10px; width: 100%; margin: 0; padding: 8px 10px; border: 0; border-radius: 8px; background: transparent; font: 400 13px/1.4 var(--sans); color: var(--slate); text-align: left; cursor: pointer; }
+.cmt-sum:hover, .cmt-sum:focus-visible { background: rgba(255, 255, 255, .06); color: var(--ink); }
+.cmt-sum .what { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.cmt-sum .open-hint { margin-left: auto; flex: none; color: var(--pencil-text); font-weight: 500; }
+.cmt-sum .ok { color: var(--done); }
+.who .span { display: block; font-size: 12px; color: var(--slate); }
+.on-slide { font-size: 12px; font-weight: 700; color: var(--pencil); white-space: nowrap; }
+.who-row .link { font-size: 12px; white-space: nowrap; }
+.also-on { display: grid; gap: 4px; justify-items: start; padding-top: 12px; border-top: 1px solid var(--line); }
+.label.quiet { color: var(--slate); }
+/* ---------- tap to edit ---------- */
+.redline li.tap { cursor: text; }
+textarea.inline { display: block; width: 100%; padding: 0; margin: 0; border: 0; background: transparent; color: var(--ink); font: inherit; line-height: 1.5; resize: none; field-sizing: content; outline: none; }
+.keys { display: block; margin-top: 4px; font-size: 11px; color: var(--slate); }
+/* ---------- feedback-mode look ---------- */
+body { margin: 0; color: var(--ink); font: 400 15px/1.5 var(--sans); font-variant-numeric: tabular-nums; overflow: hidden; background: #1D1D1F; -webkit-font-smoothing: antialiased; }
+.app { height: 100dvh; display: grid; grid-template-columns: minmax(0, 1fr) 372px; grid-template-rows: minmax(0, 1fr); }
+.canvas { min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; position: relative; margin: 12px 0 12px 12px; border-radius: 28px; overflow: hidden; background: var(--canvas); box-shadow: 0 0 0 1px rgba(255, 255, 255, .06); }
+.pill { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); z-index: 5; display: flex; align-items: center; gap: 20px; padding: 7px 7px 7px 16px; border-radius: 16px; background: rgba(14, 14, 14, .88); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: 0 0 0 1px rgba(255, 255, 255, .1); white-space: nowrap; font-size: 15px; }
+.pill .mark { display: grid; place-items: center; color: var(--ink); }
+.pill .mark svg { width: 18px; height: 18px; display: block; }
+.pill-title { font-size: 15px; font-weight: 400; }
+.pill-pos { color: var(--slate); }
+.pill-pos b { color: var(--ink); font-weight: 500; }
+.pill-btn { padding: 8px 14px; border-radius: 10px; background: var(--well); box-shadow: 0 0 0 1px rgba(255, 255, 255, .12); color: var(--ink); text-decoration: none; }
+.pill-btn:hover { background: var(--well-hover); }
+.stop { height: 100%; scroll-snap-align: start; scroll-snap-stop: always; container-type: size; display: grid; place-items: center; padding: 92px 48px 20px; }
+.stop-in.grid6 { width: min(calc(100cqw - 96px), calc((100cqh - 214px) * 2.5)); }
+.stage .hl { position: absolute; pointer-events: none; border: 1.5px dashed var(--pencil); background: rgba(76, 141, 255, .07); border-radius: 4px; }
+.stage.is-now .hl { border-style: dashed; opacity: .35; }
+/* Every comment's change on one picture: the one you're on is bright, the others are quieter, and every pin opens its comment */
+.stage .hl.off { opacity: .5; background: transparent; }
+.stage .hl .hl-who[data-pin] { pointer-events: auto; cursor: pointer; transform: translate(calc(-2px + var(--nudge, 0px)), 2px); }
+.stage .hl.on .hl-who { box-shadow: 0 0 0 2px var(--pencil), 0 2px 4px rgba(0, 0, 0, .45), 0 6px 14px rgba(0, 0, 0, .35); }
+.stage .hl.off .hl-who:hover { opacity: 1; }
+.state { font-size: 13px; font-weight: 500; color: var(--slate); }
+.cap { display: flex; flex-wrap: wrap; gap: 4px 12px; color: var(--slate); font-size: 13px; align-items: center; }
+.cap-btn { font: 500 12px var(--sans); color: var(--ink); background: var(--well); border: 0; border-radius: 8px; padding: 4px 10px; box-shadow: 0 0 0 1px rgba(255, 255, 255, .12); cursor: pointer; }
+.cap-btn:hover { background: var(--well-hover); }
+.canvas.no-hl .stage .hl { display: none; }
+/* You've changed the wording: the picture is Claude's version, so its outlines go grey and the caption says so */
+.stage.stale .hl { border-color: var(--slate); background: transparent; }
+.cap .stale-note { color: var(--pencil-text); }
+/* Before / After: a pill switch above the slide, outlines toggle on the right of the same row */
+.stop-in { display: grid; gap: 10px; width: min(calc(100cqw - 96px), calc((100cqh - 112px - var(--extra)) * 16 / 9)); --extra: 84px; }
+.stop-in.has-thumbs { --extra: 158px; }
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.bar .cap-btn { padding: 7px 12px; font-size: 13px; }
+.stop-in.is-now .pillsw { --p: 0; }
+.pillsw.dragging .knob { transition: none; }
+.pillsw button { position: relative; z-index: 1; display: grid; place-items: center; padding: 0; border: 0; border-radius: 999px; background: none; font: 500 14px var(--sans); color: var(--slate); cursor: pointer; transition: color .25s ease; }
+.pillsw button[aria-checked="true"] { color: var(--canvas); }
+@media (prefers-reduced-motion: no-preference) { .pillsw .knob { transition: transform .38s cubic-bezier(.3, 1.25, .45, 1); } }
+/* Option grid: a labelled tag on each slide that leaves, a plus on each slide that gains */
+.six .pic { position: relative; display: block; width: 100%; padding: 0; border: 0; background: none; border-radius: 6px; }
+.six .pic.zoom { cursor: zoom-in; }
+.six .pic.zoom:hover img { box-shadow: 0 0 0 3px var(--pencil), 0 0 0 7px rgba(76, 141, 255, .18); }
+.six .hl { position: absolute; border: 1.5px dashed var(--pencil); background: rgba(76, 141, 255, .07); border-radius: 3px; pointer-events: none; }
+.canvas.no-hl .six .hl { display: none; }
+.bar-l { display: flex; align-items: center; gap: 10px; min-height: 36px; }
+/* Your reply is a real text box: solid edge, blue ring while you type, drag the corner to make it taller. Dashed lines are kept for the slide outlines only. */
+textarea.field { display: block; width: 100%; margin: 8px 0 0; padding: 10px 12px; min-height: 84px; max-height: 360px; field-sizing: content; border: 1px solid rgba(255, 255, 255, .16); border-radius: 12px; background: var(--well); color: var(--ink); font: 400 15px/1.5 var(--sans); resize: vertical; cursor: text; caret-color: var(--pencil); transition: border-color .15s, box-shadow .15s; }
+textarea.field:hover { border-color: rgba(255, 255, 255, .28); }
+textarea.field:focus { outline: none; border-color: var(--pencil); box-shadow: 0 0 0 3px rgba(76, 141, 255, .28); }
+textarea.field::placeholder { color: var(--faint); }
+.redline li.editing textarea.inline { margin-top: 4px; padding: 8px 10px; border: 1px solid rgba(255, 255, 255, .16); border-radius: 10px; background: var(--well); resize: vertical; }
+.redline li.editing textarea.inline:focus { border-color: var(--pencil); box-shadow: 0 0 0 3px rgba(76, 141, 255, .28); }
+.icon-btn { margin-left: auto; display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 8px; background: transparent; color: var(--slate); cursor: pointer; }
+.icon-btn:hover { background: rgba(255, 255, 255, .08); color: var(--ink); }
+.icon-btn svg { width: 18px; height: 18px; }
+.gen, .add-reply { display: inline-flex; align-items: center; gap: 7px; margin-top: 8px; padding: 7px 12px; border: 0; border-radius: 10px; background: var(--well); box-shadow: 0 0 0 1px rgba(255, 255, 255, .12); color: var(--ink); font: 500 13px var(--sans); cursor: pointer; }
+.gen:hover, .add-reply:hover { background: var(--well-hover); }
+.gen svg, .add-reply svg { width: 16px; height: 16px; }
+.gen svg { color: var(--pencil-text); }
+.gen[disabled] { cursor: default; color: var(--slate); }
+.gen .spin { margin-right: 0; }
+/* Chat sides: the reviewer's bubble sits left with its point bottom-left; yours sits right, tinted blue, avatar on the right, point bottom-right */
+.fate svg { width: 17px; height: 17px; flex: none; }
+.fate .link { margin-left: 4px; font-size: 14px; }
+.thumb.all .tile { display: grid; place-items: center; width: 100%; aspect-ratio: 16 / 9; border-radius: 6px; background: var(--well); box-shadow: 0 0 0 1px rgba(255, 255, 255, .14); color: var(--ink); }
+.thumb.all .tile svg { width: 20px; height: 20px; }
+.thumb.all:hover .tile { background: var(--well-hover); }
+.bar .state { margin: 0; }
+.six .tag { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px 7px 11px; border-radius: 999px; white-space: nowrap; font: 500 14px var(--sans); color: var(--ink); background: rgba(14, 14, 14, .88); box-shadow: 0 0 0 1px rgba(255, 255, 255, .14); pointer-events: none; }
+.six .tag svg, .six .badge svg { width: 17px; height: 17px; flex: none; }
+.six .badge { position: absolute; top: 8px; right: 8px; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--pencil); color: var(--canvas); pointer-events: none; }
+.six .badge svg { width: 15px; height: 15px; }
+.thumb img, .six img { border-radius: 6px; box-shadow: 0 0 0 1px rgba(255, 255, 255, .08); }
+.strip { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: thin; background: transparent; border-top: 1px solid rgba(255, 255, 255, .06); padding: 12px 24px 16px; }
+.chip img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; box-shadow: 0 0 0 1px var(--edge); display: block; background: #fff; opacity: .75; border-radius: 6px; }
+/* a rounded panel, like the slide window */
+.side-top { padding: 22px 22px 8px; display: grid; gap: 10px; }
+.side-title { font-size: 16px; font-weight: 500; margin-right: auto; }
+.where-line { font-size: 14px; color: var(--slate); }
+.where-line b { color: var(--ink); font-weight: 500; }
+.help { font-size: 14px; color: var(--slate); line-height: 1.5; }
+.who b, .label, .status b { font-weight: 500; }
+.reply p, .also p { font-family: var(--sans); }
+/* No outline on the comment you're on: blue dashes only ever mean "this changed on the slide". The open one is simply the one that's open. */
+.cmt.many { padding: 14px; box-shadow: none; border: 0; border-radius: 12px; background: rgba(255, 255, 255, .05); }
+.cmt.many.folded { gap: 6px; padding: 10px 10px 6px; cursor: pointer; background: transparent; }
+.cmt.many.folded + .cmt.many, .cmt.many + .cmt.many.folded { margin-top: 4px; }
+/* Blue dashes are kept for one meaning only, "this changed on the slide". The wording you can edit is a plain field. */
+.redline li.tap:hover { box-shadow: none; outline: 1px solid rgba(255, 255, 255, .16); outline-offset: 0; }
+.redline li.editing { box-shadow: none; outline: 0; background: transparent; }
+.btn.primary, .go { background: var(--ink); color: var(--canvas); box-shadow: none; }
+@media (max-width: 899px) {
+  .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: 55dvh minmax(0, 1fr); }
+  .canvas { margin: 8px; border-radius: 20px; }
+  .pill { gap: 12px; font-size: 14px; }
+  .pill-title { display: none; }
+  .stop { padding: 76px 16px 12px; }
+  .stop-in { width: min(calc(100cqw - 32px), calc((100cqh - 88px - var(--extra)) * 16 / 9)); }
+  .pillsw { width: 168px; height: 32px; }
+  .six .tag { font-size: 12px; padding: 5px 10px 5px 8px; }
+}
+/* ---------- sidebar ---------- */
+.side { margin: 12px; border-radius: 28px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255, 255, 255, .06); min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; background: var(--sheet); }
+.side-head { border: 0; display: flex; align-items: center; gap: 8px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.side-head p { margin-right: auto; font-size: 14px; color: var(--slate); }
+.side-head p b { color: var(--ink); }
+.step { box-shadow: 0 0 0 1px rgba(255, 255, 255, .12); width: 32px; height: 32px; display: grid; place-items: center; border: 1.5px solid var(--line); border-radius: 6px; background: transparent; cursor: pointer; font-size: 15px; line-height: 1; }
+.step:hover:not(:disabled) { border-color: var(--slate); }
+.side-body { overflow-y: auto; padding: 18px; display: grid; gap: 14px; align-content: start; }
+.who { font-size: 14px; color: var(--slate); }
+.who b { color: var(--ink); }
+.claude { border-top-color: rgba(255, 255, 255, .07); display: grid; gap: 8px; padding-top: 14px; border-top: 1px solid var(--line); }
+.label { font-size: 13px; font-weight: 700; color: var(--pencil); }
+.label.mine { color: #B07F00; }
+:root[data-theme="dark"] .label.mine { color: #F0C24A; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .label.mine { color: #F0C24A; } }
+.change { font-size: 15px; }
+.redline { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 15px; }
+.redline li { padding: 6px 10px; border-radius: 4px; background: var(--raise); box-shadow: 0 0 0 1px var(--edge); }
+.ctx { display: block; font-size: 12px; font-weight: 700; color: var(--slate); margin-bottom: 1px; }
+del { color: var(--slate); text-decoration-color: var(--slate); }
+ins { text-decoration: none; background: var(--pencil-wash); color: var(--ink); box-shadow: inset 0 -2px 0 var(--pencil); padding: 0 1px; }
+.note { font-size: 13px; color: var(--slate); }
+.why, .also { font-size: 14px; color: var(--slate); }
+.why summary:hover, .also summary:hover { color: var(--ink); }
+.also p { margin-top: 6px; font: 400 15px/1.55 var(--serif); color: var(--ink); }
+.reply p { font: 400 15px/1.55 var(--serif); }
+.opts { display: grid; gap: 6px; }
+.opt small { font-weight: 400; color: var(--slate); }
+.act { display: grid; gap: 10px; justify-items: start; padding-top: 4px; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { box-shadow: 0 0 0 1px rgba(255, 255, 255, .12); font-size: 14px; font-weight: 700; border: 1.5px solid var(--line); background: transparent; border-radius: 6px; padding: 7px 14px; min-height: 38px; cursor: pointer; }
+.btn:hover { background: var(--well-hover); border-color: var(--slate); }
+.box { display: grid; gap: 8px; width: 100%; }
+.box label { font-size: 13px; font-weight: 700; }
+.box label .ctx { display: inline; margin: 0; }
+.box textarea { border-color: rgba(255, 255, 255, .12); width: 100%; min-height: 44px; field-sizing: content; resize: vertical; padding: 8px 10px; border: 1.5px solid var(--line); border-radius: 6px; background: var(--raise); }
+.box textarea:focus { outline: 2px solid var(--pencil); outline-offset: 1px; border-color: var(--pencil); }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.link { text-decoration-color: rgba(255, 255, 255, .35); font-size: 13px; font-weight: 700; color: var(--pencil); background: none; border: 0; padding: 2px 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.link.quiet { color: var(--slate); }
+.status { font-size: 14px; }
+.status b { color: var(--pencil); }
+/* ---------- approve panel ---------- */
+.side-foot { padding: 16px 18px 18px; border-top: 1px solid var(--line); display: grid; gap: 12px; }
+.seen { display: grid; gap: 6px; font-size: 13px; color: var(--slate); }
+.seen b { color: var(--ink); }
+.meter { height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.meter i { display: block; height: 100%; width: 100%; background: var(--pencil); transform: scaleX(0); transform-origin: left; }
+@media (prefers-reduced-motion: no-preference) { .meter i { transition: transform .3s ease; } }
+.tally { font-size: 13px; color: var(--slate); }
+.tally b { color: var(--ink); }
+/* Something didn't get through: the server is unreachable, or a reply didn't post */
+.tally.warn, .msg.out .msg-body > p.msg-sub.warn { color: #F2B36B; }
+.msg-sub .spin { margin-right: 6px; vertical-align: -2px; }
+.msg-sub.sent-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.msg-sub.sent-row .link { font-size: 12px; padding: 0; }
+.go:disabled { opacity: .6; cursor: progress; }
+.foot-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.done { display: grid; gap: 10px; }
+.done h2 { font-size: 18px; }
+.done p { font-size: 14px; color: var(--slate); }
+.sum { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; font-size: 14px; color: var(--slate); }
+.sum b { color: var(--ink); font-weight: 500; }
+.go-deck { display: flex; align-items: center; justify-content: center; text-decoration: none; }
+/* ---------- working: while Claude updates the deck or posts the replies ---------- */
+.spin { display: inline-block; width: 14px; height: 14px; margin-right: 8px; vertical-align: -2px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; }
+@media (prefers-reduced-motion: no-preference) {
+  .sweep i { width: 40%; opacity: 1; animation: sweep 1.4s cubic-bezier(.45, 0, .55, 1) infinite; }
+  .spin { animation: spin .8s linear infinite; }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+/* ---------- narrow screens: the slide stays pinned on top, comments and Approve scroll below it ---------- */
+@media (max-width: 899px) {
+  html, body { height: auto; }
+  body { overflow: auto; }
+  .app { height: auto; min-height: 100dvh; grid-template-columns: minmax(0, 1fr); grid-template-rows: 52dvh auto; }
+  .canvas { position: sticky; top: 0; z-index: 3; margin: 8px; border-radius: 20px; height: calc(52dvh - 16px); }
+  .stop { padding: 64px 12px 8px; }
+  .stop-in { --extra: 72px; width: min(100cqw, calc((100cqh - var(--extra)) * 16 / 9)); }
+  .stop-in.has-thumbs { --extra: 160px; }
+  .cap .r { display: none; }   /* no room for the click hint; tapping the slide still swaps it */
+  .stop-in.grid6 { width: min(100cqw, calc((100cqh - 80px) * 2.5)); }
+  .side { min-height: 0; display: block; margin: 0 8px 8px; border-radius: 20px; }
+  .side-top { padding: 14px 16px 4px; }
+  .side-body { overflow: visible; padding: 8px 16px 16px; }
+  .side-foot { padding: 14px 16px calc(16px + env(safe-area-inset-bottom)); }
+  .thumbs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }   /* one row that scrolls sideways */
+  .thumb { width: 64px; flex: none; font-size: 11px; }
+  .thumb { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .more { display: none; }
+  .strip { padding: 8px 12px; }
+  .chip { width: 60px; }
+}
+/* ---------- draft: approve as you go ---------- */
+.cmt.locked .tap { pointer-events: none; }
+.cmt.locked .claude > .note { display: none; }
+.state-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 14px; color: var(--slate); margin: 0; }
+.state-line b { color: var(--ink); font-weight: 500; }
+.state-line .spin { margin-right: 0; color: var(--pencil); }
+.ok { color: var(--done); font-weight: 600; }
+/* a finished slide: faded back, outlined green, with a check */
+.chip .mk.done { top: 4px; right: 4px; width: 16px; height: 16px; box-shadow: none; background: var(--done) url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27%230A0A0A%27%20stroke-width%3D%273.5%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M5%2012.5l4.5%204.5L19%207.5%27/%3E%3C/svg%3E") center / 10px 10px no-repeat; }
+.chip:has(.mk.done) img { opacity: .35; box-shadow: 0 0 0 2px var(--done); }
+.chip:has(.mk.done):hover img { opacity: .6; }
+.chip[aria-current="true"]:has(.mk.done) img { opacity: 1; }
+.chip .mk.work { background: var(--pencil); }
+.revised { font-size: 13px; color: var(--pencil); margin: 0; }
+.act .note { margin: 0; }
+.thread { display: grid; gap: 12px; padding: 12px 14px 14px; border-radius: 14px 14px 14px 4px; background: rgba(255, 255, 255, .055); }
+.msg-head .span { font-size: 12px; }
+.who-row { display: flex; align-items: baseline; gap: 10px; justify-content: flex-end; }
+.was { display: block; font-size: 13px; color: var(--slate); margin-bottom: 2px; }
+.redline li.editing textarea { cursor: text; }
+/* the reply box lines up with the wording boxes instead of hanging out past the column */
+/* your reply: laid out like a reviewer's comment, with the bubble's point on your side (bottom right) */
+.msg.out .msg-body > p.msg-sub { margin: 6px 0 0; font-size: 12px; color: var(--slate); }
+.msg.out .msg-body > p:not(.msg-head):not(.msg-sub) { margin: 2px 0 0; font: 400 15px/1.5 var(--sans); color: var(--ink); }
+.av.me { background: var(--chip); box-shadow: 0 0 0 1px rgba(255, 255, 255, .14); font-size: 9.5px; letter-spacing: 0; }
+.also { margin-top: 4px; }
+/* the reply header sits inside .also / .reply, whose paragraph rules (serif, top margin) were pushing it down */
+.msg-head { display: flex; flex-wrap: wrap; gap: 2px 8px; font-size: 13px; color: var(--slate); margin: 0; min-height: 28px; align-items: center; }
+.av.photo { object-fit: cover; padding: 0; background: var(--chip); }
+.why summary, .also summary { cursor: pointer; width: max-content; font-weight: 500; }
+.why p { margin-top: 8px; }
+/* ---------- comment bubbles, after Figma's: a raised card with soft depth, one square corner on the speaker's side ---------- */
+.cmt > .thread, .thread.me { gap: 10px; padding: 14px 16px 16px; border: 0; }
+.cmt > .thread { margin-right: 40px; margin: 0 32px 0 0; border-radius: 22px 22px 22px 3px; background: var(--raise); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), 0 0 0 .5px rgba(255, 255, 255, .08), 0 1px 2px rgba(0, 0, 0, .35), 0 6px 16px rgba(0, 0, 0, .32); }
+.thread.me { margin-right: 0; margin-left: 16px; margin: 0 0 0 32px; border-radius: 22px 22px 3px 22px; background: var(--mine); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .09), 0 0 0 .5px rgba(120, 165, 255, .22), 0 1px 2px rgba(0, 0, 0, .35), 0 6px 16px rgba(0, 0, 0, .32); }
+.cmt.many .thread { background: var(--raise); }
+.msg { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: 12px; }
+.av { display: grid; place-items: center; border-radius: 50%; font-weight: 600; color: #fff; letter-spacing: .02em; width: 32px; height: 32px; font-size: 12px; }
+.av.sm { width: 28px; height: 28px; font-size: 11px; }
+.thread .msg-head, .also .thread .msg-head, .reply .thread .msg-head { margin: 0; font: 400 13px/1.4 var(--sans); align-items: center; min-height: 32px; font-size: 13px; }
+.msg-head b { color: var(--ink); font-weight: 500; font-size: 15px; }
+.msg-text { margin: 2px 0 0; color: var(--ink); margin-top: 1px; font-size: 15px; line-height: 1.45; }
+.msg.in-reply { padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, .07); border-top-color: rgba(255, 255, 255, .08); }
+/* Generate sits inside the reply box, bottom left, as a quiet text action; the box is one field with one focus ring */
+.composer { position: relative; margin-top: 8px; border: 1px solid rgba(140, 180, 255, .2); border-radius: 12px; background: var(--mine-field); transition: border-color .15s, box-shadow .15s; }
+.composer:hover { border-color: rgba(140, 180, 255, .34); }
+.composer:focus-within { border-color: var(--pencil); box-shadow: 0 0 0 3px rgba(76, 141, 255, .28); }
+.composer textarea.field, .thread.me .composer textarea.field { margin: 0; border: 0; background: transparent; box-shadow: none; }
+.composer textarea.field:focus { box-shadow: none; }
+.composer .gen { position: absolute; left: 6px; bottom: 6px; margin: 0; padding: 6px 8px; border-radius: 8px; background: transparent; box-shadow: none; color: var(--pencil-text); font: 500 13px/1 var(--sans); }
+.composer .gen:hover { background: rgba(76, 141, 255, .14); color: var(--pencil-text-hover); }
+.composer .gen.busy { color: var(--slate); background: transparent; animation: genpulse 1.2s ease-in-out infinite; }
+@keyframes genpulse { 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .composer .gen.busy { animation: none; } }
+/* ---------- buttons, raised like the comment cards: a lit top edge, a hairline rim, a soft shadow underneath; they press down when clicked ---------- */
+:root { --canvas: #0A0A0A; --sheet: #262628; --well: #18181A; --well-hover: #1E1E20; --raise: #2C2C2E; --raise-hover: #333336; --chip: #3A3A3E;
+  --ink: #F2F2F2; --slate: #9D9DA3; --muted: #8A8A90; --faint: #75757C;
+  --pencil: #4C8DFF; --pencil-hover: #5C98FF; --pencil-press: #4382F0; --pencil-text: #8DB5FF; --pencil-text-hover: #B3CCFF; --mine: #26334D; --mine-field: #1B2335; --done: #3DD68C; --line: rgba(255, 255, 255, .12); --pencil-wash: rgba(76, 141, 255, .16); --on-pencil: var(--canvas); --on-ink: var(--canvas); --edge: rgba(255, 255, 255, .08); --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif; --serif: var(--sans); color-scheme: dark; --lift: inset 0 1px 0 rgba(255, 255, 255, .08), 0 0 0 .5px rgba(255, 255, 255, .12), 0 1px 2px rgba(0, 0, 0, .4), 0 3px 8px rgba(0, 0, 0, .28); --lift-hover: inset 0 1px 0 rgba(255, 255, 255, .1), 0 0 0 .5px rgba(255, 255, 255, .16), 0 2px 3px rgba(0, 0, 0, .4), 0 6px 14px rgba(0, 0, 0, .32); --pressed: inset 0 1px 2px rgba(0, 0, 0, .45), 0 0 0 .5px rgba(255, 255, 255, .1); }
+.btn, .cap-btn, .pill-btn, .step, .opt, .add-reply, .thumb.all .tile { border: 0; background: var(--raise); color: var(--ink); box-shadow: var(--lift); transition: background .15s, box-shadow .15s, transform .08s; }
+.btn, .opt, .add-reply { border-radius: 12px; }
+.cap-btn, .pill-btn, .step { border-radius: 10px; }
+.btn:hover, .cap-btn:hover, .pill-btn:hover, .step:hover:not(:disabled), .opt:hover, .add-reply:hover, .thumb.all:hover .tile { background: var(--raise-hover); box-shadow: var(--lift-hover); }
+.btn:active, .cap-btn:active, .pill-btn:active, .step:active:not(:disabled), .opt:active, .add-reply:active, .thumb.all:active .tile { transform: translateY(1px); box-shadow: var(--pressed); }
+.step:disabled { opacity: .35; cursor: default; box-shadow: 0 0 0 .5px rgba(255, 255, 255, .08); background: transparent; }
+.opt { cursor: pointer; font-size: 14px; text-align: left; padding: 9px 14px; font-weight: 500; }
+/* the main action: blue, lit from above */
+.btn.primary { border-color: var(--pencil); background: var(--pencil); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), inset 0 -1px 0 rgba(0, 0, 0, .18), 0 0 0 .5px rgba(30, 80, 190, .9), 0 1px 2px rgba(0, 0, 0, .4), 0 4px 12px rgba(76, 141, 255, .28); }
+.btn.primary:hover { background: var(--pencil-hover); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), inset 0 -1px 0 rgba(0, 0, 0, .18), 0 0 0 .5px rgba(30, 80, 190, .9), 0 2px 3px rgba(0, 0, 0, .4), 0 6px 16px rgba(76, 141, 255, .34); }
+.btn.primary:active { background: var(--pencil-press); box-shadow: inset 0 1px 3px rgba(0, 0, 0, .35), 0 0 0 .5px rgba(30, 80, 190, .9); }
+.go { width: 100%; font-size: 15px; font-weight: 700; border: 0; border-radius: 8px; padding: 12px 14px; min-height: 46px; background: var(--ink); color: var(--on-ink); cursor: pointer; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), 0 1px 2px rgba(0, 0, 0, .4), 0 4px 12px rgba(0, 0, 0, .3); transition: transform .08s, box-shadow .15s; }
+.go:active:not(:disabled) { transform: translateY(1px); box-shadow: inset 0 1px 3px rgba(0, 0, 0, .25); }
+/* the picked option takes the reply card's blue */
+.opt[aria-pressed="true"] { background: var(--mine); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .09), 0 0 0 1px var(--pencil), 0 1px 2px rgba(0, 0, 0, .4), 0 4px 12px rgba(76, 141, 255, .18); }
+/* Before / After: the track is pressed in, the knob sits up out of it */
+.pillsw { --p: 1; position: relative; display: grid; grid-template-columns: 1fr 1fr; width: 196px; height: 36px; padding: 3px; border-radius: 999px; touch-action: none; -webkit-user-select: none; user-select: none; cursor: pointer; background: var(--well); box-shadow: inset 0 1px 3px rgba(0, 0, 0, .55), inset 0 0 0 .5px rgba(0, 0, 0, .6), 0 0 0 .5px rgba(255, 255, 255, .1), 0 1px 0 rgba(255, 255, 255, .04); }
+.pillsw .knob { position: absolute; top: 3px; bottom: 3px; left: 3px; width: calc(50% - 3px); border-radius: 999px; transform: translateX(calc(var(--p) * 100%)); pointer-events: none; background: var(--ink); box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0, 0, 0, .1), 0 1px 2px rgba(0, 0, 0, .45), 0 3px 8px rgba(0, 0, 0, .35); }
+/* the labels on enlarged grid slides match */
+.fate { display: inline-flex; align-items: center; gap: 8px; margin: 0; padding: 7px 14px 7px 11px; border-radius: 999px; font-size: 14px; color: var(--ink); background: var(--raise); box-shadow: var(--lift); }
+@media (prefers-reduced-motion: reduce) { .btn:active, .cap-btn:active, .pill-btn:active, .step:active, .opt:active, .add-reply:active, .go:active { transform: none; } }
+/* who asked for it: the commenter's avatar pinned to the top-right corner of each outlined area */
+.add-reply { justify-self: start; width: max-content; }
+/* replies written after a comment is done */
+.thread.me.later { margin-top: 12px; }
+.act > .add-reply { margin-top: 12px; }
+/* reply after it's done: a slim Figma-style field */
+.rb-field:hover { box-shadow: inset 0 1px 2px rgba(0, 0, 0, .45), 0 0 0 .5px rgba(255, 255, 255, .22); }
+.rb-field:focus-within { box-shadow: inset 0 1px 2px rgba(0, 0, 0, .45), 0 0 0 1px var(--pencil), 0 0 0 4px rgba(76, 141, 255, .22); }
+.rb-field textarea { display: block; width: 100%; padding: 0 6px 0 0; border: 0; background: transparent; color: var(--ink); font: 400 15px/1.45 var(--sans); resize: none; field-sizing: content; min-height: 22px; max-height: 240px; outline: none; caret-color: var(--pencil); }
+.rb-field textarea::placeholder { color: var(--faint); }
+.rb-send { display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; cursor: pointer; background: var(--pencil); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 1px 2px rgba(0, 0, 0, .4); transition: background .15s, transform .08s; }
+.rb-send svg { width: 16px; height: 16px; }
+.rb-send:hover { background: var(--pencil-hover); }
+.rb-send:active { transform: translateY(1px); }
+.rb-field.empty .rb-send { background: var(--chip); color: var(--muted); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06); cursor: default; }
+.act > .rbar, .act > .thread.me.later { width: 100%; justify-self: stretch; align-self: stretch; }
+/* Draft with Claude, kept small: a quiet chip, and Tab in an empty reply does the same */
+.draft, .composer .gen.draft { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, .07); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05); color: var(--slate); font: 500 12px/1 var(--sans); cursor: pointer; transition: background .15s, color .15s; flex: none; }
+.draft:hover, .composer .gen.draft:hover { background: rgba(76, 141, 255, .16); color: var(--pencil-text-hover); }
+.draft.busy, .composer .gen.draft.busy { background: transparent; color: var(--slate); animation: genpulse 1.2s ease-in-out infinite; }
+.composer .gen.draft { left: 8px; bottom: 8px; }
+.composer.empty textarea.field { min-height: 92px; padding-bottom: 40px; }
+/* your bubble: the avatar sits in the top-right corner instead of taking a column, so the reply box spans the whole bubble */
+.msg.out { grid-template-columns: minmax(0, 1fr) auto; display: block; position: relative; }
+.msg.out > .av { order: 2; position: absolute; top: 0; right: 0; }
+.msg.out .msg-head { flex-wrap: nowrap; padding-right: 42px; }
+.msg.out.writing .msg-head { padding-right: 0; }   /* writing: photo left, × or bin right */
+.thread.me .composer { margin-top: 10px; }
+.thread.me textarea.field { background: var(--mine-field); border-color: rgba(140, 180, 255, .2); overflow-y: hidden; max-height: none; }
+/* Figma-style comment pin: a dark round badge with the commenter's avatar and one sharp corner.
+   It sits just outside the outline's top-right corner, its point touching the corner, so it never covers what's outlined. */
+.stage > img { border-radius: inherit; }
+.hl-who { position: absolute; display: block; z-index: 1; top: auto; right: auto; left: 100%; bottom: 100%; transform: translate(-2px, 2px); padding: 3px; border-radius: 50% 50% 50% 0; background: var(--well-hover); box-shadow: 0 0 0 1px rgba(255, 255, 255, .14), 0 2px 4px rgba(0, 0, 0, .45), 0 6px 14px rgba(0, 0, 0, .35); }
+.hl-who .av { display: grid; width: 26px; height: 26px; font-size: 10px; box-shadow: none; }
+/* reply field spacing: one 8px inset all round, text centred on the 28px buttons, avatar lined up with the field's bottom row */
+.rbar { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; margin-top: 14px; align-items: end; }
+.rbar > .av { margin-top: 4px; margin: 0 0 6px; }
+/* (44px field − 32px avatar) ÷ 2 */
+.rb-field { border-radius: 18px; background: var(--well-hover); box-shadow: inset 0 1px 2px rgba(0, 0, 0, .45), 0 0 0 .5px rgba(255, 255, 255, .12); transition: box-shadow .15s; padding: 8px 8px 8px 16px; }
+.rb-row { display: flex; align-items: flex-end; gap: 6px; }
+.rbar > .icon-btn { margin: 0 0 4px 2px; align-self: flex-end; flex: none; }   /* × closes a follow-up reply box */
+.rb-row textarea { flex: 1; padding: 3px 0; min-height: 28px; line-height: 22px; }
+.rb-row .draft { height: 28px; padding: 0 11px; }
+/* ---------- polish: one weight for emphasis, nothing under 12px for labels, one corner scale ---------- */
+.btn, .btn.primary, .opt, .go, .add-reply, .cap-btn, .pill-btn { font-weight: 500; }
+.six figcaption b, .six figcaption span, .six .plus figcaption span, .thumb[aria-pressed="true"], .chip[aria-current="true"], .on-slide, .state, .label { font-weight: 500; }
+.six .cut figcaption span { text-decoration: none; }
+.av, .av.sm, .count { font-weight: 500; }
+.side-foot b, .tally b, .seen b, .link, .link.quiet { font-weight: 500; }
+.chip { flex: none; position: relative; width: 76px; padding: 0; border: 0; background: none; cursor: pointer; display: grid; gap: 3px; color: var(--slate); text-align: left; font-size: 12px; }
+.count { display: inline-grid; place-items: center; padding: 0 4px; font-weight: 700; color: var(--ink); background: rgba(255, 255, 255, .14); min-width: 18px; height: 18px; font-size: 11px; border-radius: 9px; }
+.btn, .opt, .add-reply, .cap-btn, .pill-btn, .step, textarea.field, .composer, .box textarea { border-radius: 12px; }
+.stage { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; padding: 0; border: 0; background: #fff; cursor: pointer; touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; box-shadow: 0 0 0 1px rgba(255, 255, 255, .08); overflow: visible; border-radius: 10px; }
+.thumb img, .six img, .chip img, .thumb.all .tile { border-radius: 6px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <section class="canvas" aria-label="Slides">
+    <header class="pill">
+      <span class="mark" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3.5 4.5h13v9h-7l-4 3v-3h-2z"/></svg></span>
+      <h1 class="pill-title" id="deckTitle">Review</h1>
+      <p class="pill-pos" aria-live="polite"><b id="posW">Slide 1</b><span id="posT"></span></p>
+      <a class="pill-btn" id="deckLink" href="#" target="_blank" rel="noopener">Open in Figma</a>
+    </header>
+    <div class="scroller" id="scroller" tabindex="-1"></div>
+    <nav class="strip" id="strip" aria-label="Jump to a comment"></nav>
+  </section>
+
+  <aside class="side" aria-label="Comment and Claude's change">
+    <div class="side-top">
+      <div class="side-head">
+        <h2 class="side-title">Comments</h2>
+        <button type="button" class="step" id="prev" aria-label="Previous slide">↑</button>
+        <button type="button" class="step" id="next" aria-label="Next slide">↓</button>
+      </div>
+      <p class="where-line" id="sideWhere"></p>
+      <p class="help" id="help">All of this slide's comments are here. Open one, or click its pin on the slide, and approve them one at a time.</p>
+    </div>
+    <div class="side-body" id="sideBody" aria-live="polite"></div>
+    <div class="side-foot" id="sideFoot"></div>
+  </aside>
+</div>
+
+<script>
+const IMG = n => `img/${n}.png`;
+let DATA = null, DECK = "#", PEOPLE = {}, HL = {}, CARDS = [];
+const first = k => (PEOPLE[k] || k).split(" ")[0];
+const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+/* ---------- grouping: one stop per slide ---------- */
+const STOPS = [];
+const byId = id => CARDS.find(c => c.id === +id);
+const stopOf = id => STOPS.findIndex(s => s.ids.includes(+id));
+function group() {
+  STOPS.length = 0;
+  CARDS.forEach(c => {
+    let s = STOPS.find(x => x.n === c.slide);
+    if (!s) {
+      const r = c.range, a = r && r[0][0], b = r && r[r.length - 1][0];
+      s = { n: c.slide, label: r ? `Slides ${a} to ${b}` : `Slide ${c.slide}`, short: r ? `${a}–${b}` : String(c.slide), ids: [] };
+      STOPS.push(s);
+    }
+    s.ids.push(c.id);
+  });
+  STOPS.sort((a, b) => a.n - b.n);
+}
+/* Changes that span several slides are decided once, on their first slide. The other slides get a pointer. */
+const alsoFor = s => CARDS.filter(c => (c.alsoOn || []).includes(s.n) && !s.ids.includes(c.id));
+
+/* ---------- state ---------- */
+/* Saved per deck and round, so two reviews served from the same address never share decisions */
+let KEY = "blueline:" + location.pathname;
+const fresh = () => ({ cards: {}, picks: {}, edits: {}, replies: {}, seen: [], later: {}, base: {}, usedDrafts: [] });
+let S = fresh();
+function loadState() { try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); if (s && s.cards) S = Object.assign(fresh(), s); } catch (e) {} }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+/* Your wording, reply and pick are saved with the Claude version they were made on. When Claude redoes the card,
+   or a new run brings new drafts under the same deck and round, a saved change made on the old version is dropped,
+   so it never shows over Claude's new one (or goes into the deck instead of it). */
+const sigEdit = c => JSON.stringify((c.edit || []).map(e => e.after));
+const sigOpts = c => JSON.stringify((c.options || []).map(o => [o.key, o.name, o.desc]));
+function noteBase(c) { S.base[c.id] = { edit: sigEdit(c), reply: c.reply || "", opts: sigOpts(c) }; }
+function dropStale() {
+  CARDS.forEach(c => {
+    const b = S.base[c.id];
+    if (b) {
+      if (S.edits[c.id] && (b.edit !== sigEdit(c) || S.edits[c.id].length !== (c.edit || []).length)) delete S.edits[c.id];
+      /* a reply card's reply is Claude's draft, so a new draft replaces it; on other cards a reply you wrote yourself stays */
+      if (S.replies[c.id] != null && b.reply !== (c.reply || "") && (c.kind === "reply" || S.replies[c.id] === b.reply)) delete S.replies[c.id];
+      if (S.picks[c.id] && (b.opts !== sigOpts(c) || !(c.options || []).some(o => o.key === S.picks[c.id]))) delete S.picks[c.id];
+    }
+    noteBase(c);   // saved before this check existed: taken as made on what's here now
+  });
+}
+const zoom = {};         // option card id -> slide number shown big from the grid
+const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+const EASE = "cubic-bezier(.2, .8, .2, 1)";
+function fly(node, a, b) {
+  node.animate([{ transformOrigin: "0 0", transform: `translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width})`, zIndex: 5 },
+    { transformOrigin: "0 0", transform: "none", zIndex: 5 }], { duration: 460, easing: EASE });
+}
+const rise = nodes => nodes.forEach(n => n.animate([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 320, delay: 140, easing: EASE, fill: "backwards" }));
+function zoomTo(id, n) {
+  const i = stopOf(id), el = document.getElementById("st" + i), was = zoom[id] != null;
+  const tile = el.querySelector(`.six [data-zoom="${id}:${n}"]`), a = tile && tile.getBoundingClientRect();
+  zoom[id] = n; renderStop(i);
+  if (was || !a || calm()) return;
+  const big = el.querySelector(".stage"); fly(big, a, big.getBoundingClientRect());
+  rise([...el.querySelectorAll(".bar, .cap, .thumbs")]);
+}
+function unzoom(id) {
+  const i = stopOf(id), el = document.getElementById("st" + i), n = zoom[id];
+  const big = el.querySelector(".stage"), a = big && big.getBoundingClientRect();
+  delete zoom[id]; renderStop(i);
+  const tile = el.querySelector(`.six [data-zoom="${id}:${n}"]`);
+  if (!a || !tile || calm()) return;
+  fly(tile, a, tile.getBoundingClientRect());
+  rise([...el.querySelectorAll(".bar, figure")].filter(x => !x.contains(tile)));
+}
+let cur = -1;           // index of the stop (slide) in view
+let mode = null;        // { id, kind: "nq" } for the open Not quite box
+let editing = null;     // { id, j } the line (or "r" for the reply) being edited in place
+/* Outlines around the changed areas on the slide: on by default, the choice is remembered in this browser */
+let outlines = true;
+try { outlines = localStorage.getItem("review-v3-outlines") !== "off"; } catch (e) {}
+function setOutlines(on) {
+  outlines = on;
+  try { localStorage.setItem("review-v3-outlines", on ? "on" : "off"); } catch (e) {}
+  document.querySelector(".canvas").classList.toggle("no-hl", !on);
+  document.querySelectorAll("[data-outlines]").forEach(b => { b.textContent = on ? "Hide outlines" : "Show outlines"; b.setAttribute("aria-pressed", !on); });
+}
+const active = {};      // stop index -> comment id shown on the big slide
+const shotIdx = {};
+const stOf = c => (S.cards[c.id] || {}).st || "open";
+const DONE = ["in", "posted", "closed", "skip"], WORK = ["queued", "applying", "posting", "back", "revising", "undo", "undoing", "unposting"];
+/* "failed": Claude couldn't make the change. The card opens again with the reason, so you can approve it again or send it back. */
+const isOpen = c => ["open", "failed"].includes(stOf(c));
+const pickOf = c => S.picks[c.id] || c.pick;
+/* A comment that only gets a reply starts with Claude's reply written out: the reply is the answer.
+   A change request starts with no reply. You add one only if you want to ("Reply to Tom"), and Draft fills in the one Claude prepared. */
+const startReply = c => c.kind === "reply" ? (c.reply || "") : "";
+const replyOf = c => S.replies[c.id] ?? startReply(c);
+const hasReply = c => !!replyOf(c).trim();
+/* A reply equal to what the card starts with isn't stored; anything else is, including "" for a reply you deleted */
+function setReply(c, v) { if (v === startReply(c)) delete S.replies[c.id]; else S.replies[c.id] = v; }
+const replyOpen = new Set();   // cards where you pressed "Reply" but haven't typed yet
+const genText = new Map();     // card id -> the reply Generate with Claude wrote (demo stand-in)
+const byClaude = c => { const t = replyOf(c); return !!t && (t === c.reply || t === genText.get(c.id)); };
+function standIn(c) {          // demo only: a real run asks Claude; here the reply is built from Claude's own note
+  const who = first(c.who);
+  if (c.kind === "pick") { const o = c.options.find(x => x.key === pickOf(c)); return `Thanks, ${who}. We're going with ${o.name.toLowerCase()}: ${o.desc}`; }
+  return `Thanks, ${who}. ${c.change || "Done."}`;
+}
+const edited = c => !!S.edits[c.id];
+const activeOf = i => byId(active[i] ?? STOPS[i].ids[0]);
+
+/* ---------- canvas ---------- */
+const ICON = (() => { const s = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  return {
+    hide: s('<path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.4 5.2A9.5 9.5 0 0 1 12 5c4.5 0 8 4 9 7a11.6 11.6 0 0 1-2.3 3.4M6.2 6.3C4.4 7.6 3.3 9.6 3 12c1 3 4.5 7 9 7a9.4 9.4 0 0 0 4.4-1.1"/>'),
+    merge: s('<path d="m8 7 4-4 4 4"/><path d="M12 3v5.4a6.7 6.7 0 0 1-3 5.6 6.7 6.7 0 0 0-3 5.6V21"/><path d="M12 3v5.4a6.7 6.7 0 0 0 3 5.6 6.7 6.7 0 0 1 3 5.6V21"/>'),
+    plus: s('<path d="M12 5v14M5 12h14"/>'),
+    up: s('<path d="M12 19V5M6 11l6-6 6 6"/>'),
+    trash: s('<path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/>'),
+    close: s('<path d="M6 6l12 12M18 6 6 18"/>'),
+    reply: s('<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>'),
+    grid: s('<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/>') }; })();
+/* A slide with several comments, when Claude made one picture of it with every change in (data.json "stops"):
+   every comment's pin is on it at once. The comment you're on has the bright pin; click any pin to open that comment.
+   A change decided on another slide ("Also on this slide") gets a pin too, which takes you there. */
+function comboHTML(c, sp) {
+  const outl = `<button type="button" class="cap-btn" data-outlines aria-pressed="${!outlines}">${outlines ? "Hide outlines" : "Show outlines"}</button>`;
+  const placed = [];
+  const pins = Object.entries(sp.pins || {}).map(([k, bs]) => {
+    const card = byId(k); if (!card) return "";
+    const on = card.id === c.id;
+    return bs.map(([x, y, w, h], j) => {
+      let pin = "";
+      if (j === 0) {   /* one pin per comment, on its first box; nudge it along if another pin already sits there */
+        const ax = x + w, near = placed.filter(([px, py]) => Math.abs(px - ax) < 3 && Math.abs(py - y) < 5).length;
+        placed.push([ax, y]);
+        const away = stopOf(card.id) !== stopOf(c.id) ? ` (decided on ${STOPS[stopOf(card.id)].label.toLowerCase()})` : "";
+        pin = `<span class="hl-who" data-pin="${card.id}" style="--nudge:${near * 30}px" title="${esc((PEOPLE[card.who] || card.who) + away)}">${avHTML(card.who, true)}</span>`;
+      }
+      return `<span class="hl ${on ? "on" : "off"}" style="left:${x}%;top:${y}%;width:${w}%;height:${h}%">${pin}</span>`;
+    }).join("");
+  }).join("");
+  const n = Object.keys(sp.pins || {}).length;
+  return `<div class="stop-in">
+    <div class="bar"><div class="pillsw" role="radiogroup" aria-label="Show the slide"><span class="knob" aria-hidden="true"></span><button type="button" role="radio" data-side="now" aria-checked="false" tabindex="-1">Before</button><button type="button" role="radio" data-side="new" aria-checked="true">After</button></div>${outl}</div>
+    <button type="button" class="stage${edited(c) ? " stale" : ""}" data-stage aria-pressed="false" aria-label="Slide ${c.slide} with every proposed change. Press to see it before the changes.">
+      <img class="new" src="${IMG(sp.after)}" alt=""><img class="now" src="${IMG(sp.before)}" alt="">${pins}
+    </button>
+    <p class="cap"><span>Slide ${c.slide} · all ${n} changes on this slide</span>${edited(c) ? `<span class="stale-note">The picture shows Claude's wording. Yours is what goes into the deck.</span>` : ""}</p></div>`;
+}
+function stageHTML(c) {
+  const sp = (DATA.stops || {})[c.slide];
+  if (sp && c.kind !== "pick" && STOPS[stopOf(c.id)].ids.length > 1) return comboHTML(c, sp);
+  if (c.kind === "reply") {
+    return `<div class="stop-in"><p class="state">No change to this slide</p><div class="stage still"><img src="${IMG(c.image)}" alt="${esc(c.where)}"></div>
+      <p class="cap"><span>${esc(c.where)}</span><span class="r">Claude answers ${esc(first(c.who))} instead</span></p></div>`;
+  }
+  if (c.kind === "pick") {
+    const o = c.options.find(x => x.key === pickOf(c)), to = c.range[0][0], strip = o.strip || {};
+    const isNew = n => (o.newAfter || []).includes(n);
+    const from = c.range.filter(([n]) => strip[n] === "fold").map(([n]) => n);
+    const L = n => { const s = strip[n] || "";
+      if (s === "plus") return isNew(n) ? `New slide after slide ${n}` : from.length && n === to ? `Gets content from slide ${from.join(" and ")}` : "Gets content";
+      return { "": "Kept", cut: "Hidden", fold: `Merges into slide ${to}` }[s]; };
+    const outl = `<button type="button" class="cap-btn" data-outlines aria-pressed="${!outlines}">${outlines ? "Hide outlines" : "Show outlines"}</button>`;
+    const box = (k, pin) => (HL[k] || []).map(([x, y, w, hh]) => `<span class="hl" style="left:${x}%;top:${y}%;width:${w}%;height:${hh}%">${pin ? `<span class="hl-who" title="${esc(PEOPLE[c.who] || "")}">${avHTML(c.who, true)}</span>` : ""}</span>`).join("");
+    const z = zoom[c.id];
+    if (z != null) {
+      const before = c.range.find(([n]) => n === z)[1], after = (o.images || {})[z] || before, s = strip[z] || "";
+      const fate = s === "fold" ? `<p class="fate">${ICON.merge}<span>Merges into slide ${to}. This slide is then hidden.</span><button type="button" class="link" data-zoom="${c.id}:${to}">See slide ${to}</button></p>`
+        : s === "cut" ? `<p class="fate">${ICON.hide}<span>Hidden from the deck. Nothing carries over.</span></p>`
+        : isNew(z) ? `<p class="fate">${ICON.plus}<span>New slide, added after slide ${z}.</span></p>` : `<p class="state">No change to this slide</p>`;
+      const row = `<div class="thumbs" role="group" aria-label="Slides in option ${o.key}"><button type="button" class="thumb all" data-unzoom="${c.id}"><span class="tile">${ICON.grid}</span>All ${c.range.length}</button>${c.range.map(([n, img]) =>
+        `<button type="button" class="thumb" data-zoom="${c.id}:${n}" aria-pressed="${n === z}"><img src="${IMG((o.images || {})[n] || img)}" alt="">Slide ${n}</button>`).join("")}</div>`;
+      const cap = `<p class="cap"><span>Slide ${z} · ${esc(L(z))}</span></p>`;
+      if (after === before || isNew(z)) return `<div class="stop-in has-thumbs"><div class="bar"><div class="bar-l">${fate}</div></div>
+        <div class="stage still"><img src="${IMG(after)}" alt="Slide ${z}"></div>${cap}${row}</div>`;
+      return `<div class="stop-in has-thumbs"><div class="bar"><div class="bar-l"><div class="pillsw" role="radiogroup" aria-label="Show the slide"><span class="knob" aria-hidden="true"></span><button type="button" role="radio" data-side="now" aria-checked="false" tabindex="-1">Before</button><button type="button" role="radio" data-side="new" aria-checked="true">After</button></div></div>${outl}</div>
+        <button type="button" class="stage" data-stage aria-pressed="false" aria-label="Slide ${z} with the change. Press to see it before the change."><img class="new" src="${IMG(after)}" alt=""><img class="now" src="${IMG(before)}" alt="">${box(after, true)}</button>${cap}${row}</div>`;
+    }
+    return `<div class="stop-in grid6"><div class="bar"><p class="state">Option ${o.key}: ${esc(o.name)}, ${o.count}</p>${outl}</div><div class="six" aria-label="Slides under option ${o.key}">${c.range.map(([n, img]) => {
+      const s = strip[n] || "", shown = (o.images || {})[n] || img;
+      const tag = s === "cut" ? `<span class="tag" aria-hidden="true">${ICON.hide}Hidden</span>` : s === "fold" ? `<span class="tag" aria-hidden="true">${ICON.merge}Merges into slide ${to}</span>` : s === "plus" ? `<span class="badge" aria-hidden="true">${ICON.plus}</span>` : "";
+      const inner = `<img src="${IMG(shown)}" alt="Slide ${n}${shown !== img ? " with the change" : ""}">${shown !== img && !isNew(n) ? box(shown) : ""}${tag}`;
+      const pic = `<button type="button" class="pic zoom" data-zoom="${c.id}:${n}" aria-label="Slide ${n}, ${esc(L(n))}. Open it big.">${inner}</button>`;
+      return `<figure class="${s}">${pic}<figcaption><b>Slide ${n}</b> · <span>${esc(L(n))}</span></figcaption></figure>`;
+    }).join("")}</div></div>`;
+  }
+  const i = shotIdx[c.id] || 0, [b, a, cap] = c.shots[i];
+  const boxes = (HL[a] || []).map(([x, y, w, h]) => `<span class="hl" style="left:${x}%;top:${y}%;width:${w}%;height:${h}%"><span class="hl-who" title="${esc(PEOPLE[c.who] || "")}">${avHTML(c.who, true)}</span></span>`).join("");
+  const many = c.shots.length > 1;
+  const thumbs = many ? `<div class="thumbs" role="group" aria-label="Slides in this change">${c.shots.map(([, a2, cap2], j) =>
+      `<button type="button" class="thumb" data-shot="${c.id}:${j}" aria-pressed="${j === i}"><img src="${IMG(a2)}" alt="">${esc(cap2)}</button>`).join("")}${c.more ? `<span class="more">${esc(c.more)}</span>` : ""}</div>` : "";
+  return `<div class="stop-in${many ? " has-thumbs" : ""}">
+    <div class="bar"><div class="pillsw" role="radiogroup" aria-label="Show the slide"><span class="knob" aria-hidden="true"></span><button type="button" role="radio" data-side="now" aria-checked="false" tabindex="-1">Before</button><button type="button" role="radio" data-side="new" aria-checked="true">After</button></div><button type="button" class="cap-btn" data-outlines aria-pressed="${!outlines}">${outlines ? "Hide outlines" : "Show outlines"}</button></div>
+    <button type="button" class="stage${edited(c) ? " stale" : ""}" data-stage aria-pressed="false" aria-label="${esc(cap)} with ${edited(c) ? "Claude's wording, not yours" : "the change"}. Press to see it before the change.">
+      <img class="new" src="${IMG(a)}" alt=""><img class="now" src="${IMG(b)}" alt="">${boxes}
+    </button>
+    <p class="cap"><span>${esc(cap)}</span>${edited(c) ? `<span class="stale-note">The picture shows Claude's wording. Yours is what goes into the deck.</span>` : ""}</p>${thumbs}</div>`;
+}
+function renderStop(i) { const el = document.getElementById("st" + i); if (el) el.innerHTML = stageHTML(activeOf(i)); }
+function stripHTML() {
+  return STOPS.map((s, i) => {
+    const cs = s.ids.map(byId), c = cs[0];
+    const img = c.kind === "reply" ? c.image : c.kind === "pick" ? c.range[0][1] : c.shots[0][1];
+    const mk = cs.some(x => WORK.includes(stOf(x))) ? "work" : cs.every(x => DONE.includes(stOf(x))) ? "done" : cs.some(edited) || cs.some(x => S.replies[x.id] != null) ? "edit" : "";
+    const num = s.short;
+    return `<button type="button" class="chip" data-go="${i}"${i === cur ? ' aria-current="true"' : ""} aria-label="${esc(s.label)}, ${cs.length} ${cs.length === 1 ? "comment" : "comments"}"><img src="${IMG(img)}" alt="" loading="lazy">${mk ? `<span class="mk ${mk}"></span>` : ""}<span class="chip-n">${num}${cs.length > 1 ? `<span class="count">${cs.length}</span>` : ""}</span></button>`;
+  }).join("");
+}
+
+/* ---------- sidebar ---------- */
+/* Undo on a card that only posted a reply takes the reply down; nothing in the deck changes */
+const replyOnly = (c, d) => d.from ? d.from === "posted" : c.kind === "reply";
+function ahead(c) { const t = S.cards[c.id].t; return CARDS.filter(x => WORK.includes(stOf(x)) && S.cards[x.id].t < t).length; }
+/* A decision that didn't reach the server says so on its card, whatever state the card is back in */
+const actHTML = c => (UNSENT[c.id] ? `<p class="status warn" role="alert"><b>Didn't send:</b> ${esc(UNSENT[c.id])}</p>` : "") + actHTML0(c);
+function actHTML0(c) {
+  const st = stOf(c), d = S.cards[c.id] || {}, id = c.id, who = esc(first(c.who));
+  const undo = `<button type="button" class="link quiet" data-act="undo" data-id="${id}">Undo</button>`;
+  const wait = () => { const n = ahead(c); return n ? `waiting its turn, ${n} ahead` : "next up"; };
+  if (st === "queued") return `<p class="state-line">${SPIN}<span><b>${c.kind === "reply" ? "Posting" : "Approved"}</b> · ${wait()}</span></p>`;
+  if (st === "applying") return `<p class="state-line">${SPIN}<b>Going into the deck…</b></p>`;
+  if (st === "posting") return `<p class="state-line">${SPIN}<b>Posting to ${who}'s thread…</b></p>`;
+  if (st === "in") return `<p class="state-line"><span class="ok">✓ In the deck</span>${hasReply(c) ? `<span>· reply posted to ${who}</span>` : ""}</p>${d.why ? `<p class="status"><b>${esc(d.why)}</b></p>` : ""}${undo}`;
+  if (st === "posted") return `<p class="state-line"><span class="ok">✓ Posted to ${who}'s thread</span></p>${d.why ? `<p class="status"><b>${esc(d.why)}</b></p>` : ""}${undo}`;
+  if (st === "closed") return `<p class="state-line"><span class="ok">✓ Done</span><span>· nothing posted to ${who}</span></p>${undo}`;
+  if (st === "back") return `<p class="status"><b>Sent back:</b> “${esc(d.note)}”</p><p class="state-line">${SPIN}<span>With Claude · ${wait()}</span></p>`;
+  if (st === "revising") return `<p class="status"><b>Sent back:</b> “${esc(d.note)}”</p><p class="state-line">${SPIN}<b>Claude is redoing this…</b></p>`;
+  if (st === "undo") return `<p class="state-line">${SPIN}<span><b>${replyOnly(c, d) ? "Taking your reply down" : "Taking it out"}</b> · ${wait()}</span></p>`;
+  if (st === "undoing") return `<p class="state-line">${SPIN}<b>Taking it out of the deck…</b></p>`;
+  if (st === "unposting") return `<p class="state-line">${SPIN}<b>Taking your reply out of ${who}'s thread…</b></p>`;
+  if (st === "skip") return `<p class="status"><b>Skipped.</b> This one stays as it is.</p>${undo}`;
+  if (mode && mode.id === id && mode.kind === "nq") {
+    return `<div class="box"><label for="nq-${id}">What's off?</label>
+      <textarea id="nq-${id}" placeholder="${c.kind === "reply" ? "For example: too formal for Dana" : "For example: use teal, not grey"}"></textarea>
+      <div class="row"><button type="button" class="btn primary" data-act="send" data-id="${id}">Send back to Claude</button><button type="button" class="link quiet" data-act="cancel" data-id="${id}">Cancel</button></div>
+      <button type="button" class="link quiet" data-act="skip" data-id="${id}">Or skip this comment</button></div>`;
+  }
+  const rev = st === "failed" ? `<p class="status"><b>Didn't go in:</b> ${esc(d.why || "Claude couldn't make this change.")} Approve it again, or say what to do instead.</p>`
+    : d.revised ? `<p class="revised">Claude's second try, after your note “${esc(d.note)}”.${LIVE ? "" : " In a real run the new preview replaces the slide."}</p>` : "";
+  /* a comment that only gets a reply is posted; a change to the deck is approved */
+  const label = c.kind === "reply" ? (hasReply(c) ? "Post" : "Done") : "Approve";
+  const extra = c.kind === "reply" ? `<p class="note">${hasReply(c) ? `Posts this reply in ${who}'s comment thread.` : "Nothing is posted while the reply is blank."}</p>` : hasReply(c) ? `<p class="note">Also posts the reply to ${who}.</p>` : "";
+  return `${rev}<div class="btns"><button type="button" class="btn primary" data-act="approve" data-id="${id}">${label}</button><button type="button" class="btn" data-act="nq" data-id="${id}">Not quite</button></div>${extra}`;
+}
+/* data.json's redline lines are HTML for their del/ins marks. Only those marks are kept; anything else shows as text,
+   so slide text that looks like a tag can never run on this page */
+const SAFE_TAGS = new Set(["DEL", "INS", "B", "I", "EM", "STRONG", "SPAN", "BR"]);
+function safeHTML(html) {
+  const t = document.createElement("template");   // a template's content is inert: nothing in it loads or runs
+  t.innerHTML = String(html ?? "");
+  const walk = n => [...n.childNodes].forEach(k => {
+    if (k.nodeType === 3) return;
+    if (k.nodeType !== 1 || !SAFE_TAGS.has(k.tagName)) { k.replaceWith(document.createTextNode(k.nodeType === 1 ? k.textContent : "")); return; }
+    [...k.attributes].forEach(a => { if (!(k.tagName === "SPAN" && a.name === "class")) k.removeAttribute(a.name); });
+    walk(k);
+  });
+  walk(t.content);
+  return t.innerHTML;
+}
+/* Tap to edit: the wording itself turns into a text field in place. Enter or tapping away saves, Esc cancels. */
+function lineText(c, j) { return (S.edits[c.id] || [])[j] ?? c.edit[j].after; }
+/* While a card is still open, the new wording and replies are always text fields. Typing saves as you go. */
+function tapLine(c, j, html) {
+  if (!isOpen(c)) return `<li>${html}</li>`;
+  const e = c.edit[j], ctx = e.ctx ? `<span class="ctx">${esc(e.ctx)}</span>` : "";
+  return `<li class="editing">${ctx}${e.find ? `<span class="was"><del>${esc(e.find)}</del></span>` : ""}<textarea class="inline" rows="1" data-live="${c.id}:${j}" aria-label="New wording${e.ctx ? ", " + esc(e.ctx) : ""}">${esc(lineText(c, j))}</textarea></li>`;
+}
+function replyTap(c) {
+  if (!isOpen(c)) return `<p>${esc(replyOf(c))}</p>`;
+  const t = replyOf(c), rows = Math.min(10, Math.max(3, Math.ceil(t.length / 34)));
+  const gen = t.trim() ? "" : draftBtn(c, "reply", "gen draft");
+  return `<div class="composer${gen ? " empty" : ""}"><textarea class="field" rows="${rows}" data-live="${c.id}:r" placeholder="Reply to ${esc(first(c.who))}" aria-label="Reply to ${esc(first(c.who))}">${esc(t)}</textarea>${gen}</div>`;
+}
+/* The reply back reads as a comment from you in the thread, with the text still open to edit */
+/* Your own Figma name and photo when the review data has them (data.json "me"), otherwise a plain "You" */
+function meAv() {
+  const m = DATA.me || {};
+  if (m.img) return `<img class="av me photo" src="${esc(m.img)}" alt="" referrerpolicy="no-referrer">`;
+  const ini = m.name ? m.name.split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase() : "You";
+  return `<span class="av me" aria-hidden="true">${esc(ini)}</span>`;
+}
+function outHTML(c) {
+  /* Every open reply box can be closed: × when it's empty, the bin when there's a reply in it. Either way you're back to "Reply to …". */
+  const del = !isOpen(c) ? "" : hasReply(c) ? `<button type="button" class="icon-btn" data-act="delreply" data-id="${c.id}" aria-label="Delete your reply to ${esc(first(c.who))}" title="Delete this reply">${ICON.trash}</button>`
+    : `<button type="button" class="icon-btn" data-act="delreply" data-id="${c.id}" aria-label="Close the reply to ${esc(first(c.who))}" title="Close">${ICON.close}</button>`;
+  /* While you're writing, the box is just your photo on the left, × or the bin on the right, and the reply. Who it's from and to shows once it's sent. */
+  const head = isOpen(c) ? `<p class="msg-head">${meAv()}${del}</p>`
+    : `<p class="msg-head"><b>${esc((DATA.me && DATA.me.name) || "You")}</b><span>to ${esc(first(c.who))}</span></p>`;
+  return `<div class="thread me"><div class="msg out${isOpen(c) ? " writing" : ""}">${isOpen(c) ? "" : meAv()}<div class="msg-body">${head}${replyTap(c)}${isOpen(c) && byClaude(c) ? `<p class="msg-sub">Drafted by Claude</p>` : ""}</div></div></div>`;
+}
+/* Why always starts collapsed; whoever wants Claude's reasoning opens it. An opened one stays open while you move around. */
+const whyOpened = new Set();
+const whyOpen = c => whyOpened.has(c.id);
+document.addEventListener("toggle", e => { const d = e.target; if (!d.dataset || d.dataset.why == null) return; d.open ? whyOpened.add(+d.dataset.why) : whyOpened.delete(+d.dataset.why); }, true);
+/* After a comment is done (in the deck, posted or skipped) you can still reply in its thread */
+const laterDraft = new Map();
+const laterOpen = new Set();   // done cards where you pressed "Reply to …"
+/* "Reply to …" stays on a card from the moment you approve it: while Claude is still putting it in, and after.
+   Only a card you sent back hides it, because it comes back open with its own reply button. */
+const canReplyLater = c => !isOpen(c) && !["back", "revising"].includes(stOf(c));
+/* Replies sent after a card is done: { text, st: "posting" | "posted" | "failed", why }. Live, they come from the server. */
+const laterOf = c => ((LIVE ? LATER[c.id] : (S.later || {})[c.id]) || []).map(x => typeof x === "string" ? { text: x, st: "posted" } : x);
+/* "Ask Claude" buttons waiting for Claude's text, by "<card id>:reply" or "<card id>:later" */
+const drafting = new Map();
+const draftBtn = (c, kind, cls) => drafting.has(`${c.id}:${kind}`)
+  ? `<button type="button" class="${cls} busy" disabled>Asking Claude…</button>`
+  : `<button type="button" class="${cls}" data-act="gen${kind}" data-id="${c.id}" title="Draft a reply with Claude" aria-label="Draft a reply with Claude">Ask Claude</button>`;
+function laterHTML(c) {
+  const who = esc(first(c.who)), name = esc((DATA.me && DATA.me.name) || "You");
+  const undo = (x, k) => `<button type="button" class="link quiet" data-act="unlater" data-id="${c.id}" data-n="${LIVE ? x.n : k}">Undo</button>`;
+  const sub = (x, k) => x.st === "posted" ? `<p class="msg-sub sent-row"><span>Posted to ${who}'s thread</span>${undo(x, k)}</p>${x.why ? `<p class="msg-sub warn">${esc(x.why)}</p>` : ""}`
+    : x.st === "removing" ? `<p class="msg-sub">${SPIN}Taking it out of ${who}'s thread…</p>`
+    : x.st === "failed" ? `<p class="msg-sub warn">Didn't post${x.why ? `: ${esc(x.why)}` : ""}</p>` : `<p class="msg-sub">${SPIN}Posting to ${who}'s thread…</p>`;
+  const sent = laterOf(c).map((x, k) => `<div class="thread me later"><div class="msg out">${meAv()}<div class="msg-body"><p class="msg-head"><b>${name}</b><span>to ${who}</span></p><p>${esc(x.text)}</p>${sub(x, k)}</div></div></div>`).join("");
+  const t = laterDraft.get(c.id) || "", empty = !t.trim();
+  /* Same as before a card is decided: a "Reply to Tom" button, and the reply box only once you ask for it */
+  if (!laterOpen.has(c.id) && empty && !drafting.has(`${c.id}:later`))
+    return `${sent}<button type="button" class="add-reply" data-act="openlater" data-id="${c.id}">${ICON.reply}Reply to ${who}</button>`;
+  /* one slim field, like Figma's reply box: your avatar, the text, and a round send button; Draft sits in it while it's empty */
+  return `${sent}<div class="rbar">${meAv()}<div class="rb-field${empty ? " empty" : ""}">
+    <div class="rb-row"><textarea rows="1" data-later="${c.id}" placeholder="Reply to ${who}" aria-label="Reply to ${who}">${esc(t)}</textarea>
+    ${empty ? draftBtn(c, "later", "draft") : ""}<button type="button" class="rb-send" data-act="postlater" data-id="${c.id}" aria-label="Post your reply to ${who}">${ICON.up}</button></div>
+  </div><button type="button" class="icon-btn" data-act="closelater" data-id="${c.id}" aria-label="Close the reply to ${who}" title="Close">${ICON.close}</button></div>`;
+}
+function focusLater(c) { const t = document.querySelector(`textarea[data-later="${c.id}"]`); if (t) { t.focus(); t.setSelectionRange(t.value.length, t.value.length); } }
+function postLater(c) {
+  const t = (laterDraft.get(c.id) || "").trim();
+  if (!t) { focusLater(c); return; }
+  laterDraft.delete(c.id); laterOpen.delete(c.id);   /* sent: back to the "Reply to …" button */
+  if (LIVE) {
+    (LATER[c.id] ||= []).push({ text: t, st: "posting" });
+    /* didn't get through: the reply goes back in its box rather than vanishing */
+    send(c, { act: "later", text: t }).then(n => { if (n == null && !(laterDraft.get(c.id) || "").trim()) { laterDraft.set(c.id, t); laterOpen.add(c.id); keepFocus(refresh); } });
+    renderSide(); return;
+  }
+  (S.later ||= {})[c.id] = [...laterOf(c), { text: t, st: "posted" }]; save(); renderSide();
+}
+/* Undo on a later reply: it comes out of the thread, and its text goes back in the reply box if that's empty */
+function unLater(c, k) {
+  const back = x => { if (!(laterDraft.get(c.id) || "").trim()) { laterDraft.set(c.id, x.text); laterOpen.add(c.id); } };
+  if (LIVE) {
+    const x = (LATER[c.id] || []).find(e => e.n === k);
+    if (!x || x.st !== "posted") return;
+    x.st = "removing"; renderSide(); send(c, { act: "unlater", of: k }).then(n => { if (n != null) back(x); });
+    return;
+  }
+  const arr = laterOf(c), x = arr[k];
+  if (!x || x.st !== "posted") return;
+  arr[k] = Object.assign({}, x, { st: "removing" }); S.later[c.id] = arr; save(); renderSide();
+  const g = gen;
+  setTimeout(() => { if (g !== gen) return; S.later[c.id] = laterOf(c).filter(e => e.text !== x.text || e.st !== "removing"); back(x); save(); refresh(); }, 1500);
+}
+function focusReply(c) { const t = document.querySelector(`textarea[data-live="${c.id}:r"]`); if (t) { t.focus(); t.setSelectionRange(t.value.length, t.value.length); } }
+/* What Approve will do, said in one line above the buttons, so nobody has to open Why to find out */
+const changeP = t => t ? `<p class="change">${esc(t)}</p>` : "";
+function claudeHTML(c) {
+  const whyP = [c.why].filter(Boolean);
+  const why = whyP.length ? `<details class="why" data-why="${c.id}"${whyOpen(c) ? " open" : ""}><summary>Why</summary>${whyP.map(t => `<p>${esc(t)}</p>`).join("")}</details>` : "";
+  const also = hasReply(c) || replyOpen.has(c.id) ? `<div class="also">${outHTML(c)}</div>`
+    : isOpen(c) ? `<button type="button" class="add-reply" data-act="addreply" data-id="${c.id}">${ICON.reply}Reply to ${esc(first(c.who))}</button>` : "";
+  if (c.kind === "reply") {
+    const mine = S.replies[c.id] != null && S.replies[c.id] !== c.reply;
+    if (!hasReply(c) && !replyOpen.has(c.id) && isOpen(c))
+      return `<div class="claude reply"><button type="button" class="add-reply" data-act="addreply" data-id="${c.id}">${ICON.reply}Reply to ${esc(first(c.who))}</button>${why}</div>`;
+    return `<div class="claude reply">${outHTML(c)}
+      ${mine && hasReply(c) && isOpen(c) ? `<button type="button" class="link quiet" data-act="revert" data-id="${c.id}">Go back to Claude's reply</button>` : ""}${why}</div>`;
+  }
+  if (c.kind === "pick") {
+    const o = c.options.find(x => x.key === pickOf(c));
+    const pwhy = c.why ? `<details class="why" data-why="${c.id}"${whyOpen(c) ? " open" : ""}><summary>Why</summary><p>${esc(c.why)}</p></details>` : "";
+    return `<div class="claude"><p class="label">Claude</p>
+      <div class="opts" role="group" aria-label="Options">${c.options.map(x => `<button type="button" class="opt" data-pick="${esc(x.key)}" data-id="${c.id}" aria-pressed="${x.key === o.key}"${isOpen(c) ? "" : " disabled"}>${esc(x.key)}. ${esc(x.name)} <small>· ${esc(x.count)}${x.key === c.pick ? ", suggested" : ""}</small></button>`).join("")}</div>
+      ${changeP(o.desc)}${also}${pwhy}</div>`;
+  }
+  if (edited(c)) {
+    return `<div class="claude"><p class="label mine">Your edit</p>
+      <ul class="redline">${S.edits[c.id].map((t, j) => tapLine(c, j, `${c.edit[j].ctx ? `<span class="ctx">${esc(c.edit[j].ctx)}</span>` : ""}<ins>${esc(t)}</ins>`)).join("")}</ul>
+      <p class="note">The slide shows Claude's version. Your wording is what ${isOpen(c) ? "goes" : "went"} into the deck.</p>
+      ${isOpen(c) ? `<button type="button" class="link quiet" data-act="revert" data-id="${c.id}">Go back to Claude's wording</button>` : ""}${also}${why}</div>`;
+  }
+  return `<div class="claude"><p class="label">Claude</p>${changeP(c.change)}
+    ${c.redline ? `<ul class="redline">${c.redline.map((l, j) => c.edit ? tapLine(c, j, safeHTML(l)) : `<li>${safeHTML(l)}</li>`).join("")}</ul>` : ""}
+    ${also}${why}</div>`;
+}
+const AV = ["#5B8DEF", "#E07A5F", "#3FB27F", "#A77BDB", "#D6A13A"];
+function avHTML(k, small) {
+  const name = PEOPLE[k] || k, ini = name.split(" ").map(w => w[0]).slice(0, 2).join("");
+  const n = Math.max(0, Object.keys(PEOPLE).indexOf(k));
+  return `<span class="av${small ? " sm" : ""}" style="background:${AV[n % AV.length]}" aria-hidden="true">${esc(ini)}</span>`;
+}
+function msgHTML(k, text, where, reply) {
+  return `<div class="msg${reply ? " in-reply" : ""}">${avHTML(k, reply)}<div class="msg-body"><p class="msg-head"><b>${esc(PEOPLE[k] || k)}</b>${where}</p><p class="msg-text">${esc(text)}</p></div></div>`;
+}
+/* One line under a comment you're not on: where it stands, or what Claude proposes */
+function sumHTML(c) {
+  const st = stOf(c), who = esc(first(c.who));
+  if (UNSENT[c.id]) return `<span class="warn"><b>Didn't send.</b> Open it to see why.</span>`;
+  if (st === "in") return `<span class="ok">✓ In the deck</span>`;
+  if (st === "posted") return `<span class="ok">✓ Replied to ${who}</span>`;
+  if (st === "closed") return `<span class="ok">✓ Done</span>`;
+  if (st === "skip") return `<span>Skipped</span>`;
+  if (st === "failed") return `<span><b>Didn't go in.</b> Open it to see why.</span>`;
+  if (WORK.includes(st)) return `<span>${SPIN}With Claude</span>`;
+  const what = c.kind === "reply" ? `Claude drafted a reply to ${first(c.who)}` : c.kind === "pick" ? `Claude suggests option ${pickOf(c)}` : c.change || "Claude has a change";
+  return `<span class="what">${esc(what)}</span>`;
+}
+/* Several comments on one slide: you see all of them, and work on one at a time. The one you're on is open with
+   Claude's change and the buttons; its pin is the bright one on the slide. The others show the reviewer's words and one line. */
+function cmtHTML(c, i, many) {
+  const on = activeOf(i).id === c.id;
+  const where = c.where !== STOPS[i].label ? `<span class="span">${esc(c.where)}</span>` : "";
+  const thread = `<div class="thread">${msgHTML(c.who, c.comment, where)}${c.replyFrom ? msgHTML(c.replyFrom[0], c.replyFrom[1], "", true) : ""}</div>`;
+  if (many && !on) return `<article class="cmt many folded${!isOpen(c) ? " locked" : ""}" data-sel="${c.id}">${thread}
+    <button type="button" class="cmt-sum" data-show="${c.id}" aria-label="Open ${esc(first(c.who))}'s comment">${sumHTML(c)}<span class="open-hint">Open</span></button></article>`;
+  return `<article class="cmt${many ? " many" : ""}${!isOpen(c) ? " locked" : ""}"${many ? ` data-sel="${c.id}" aria-current="true"` : ""}>
+    ${thread}${claudeHTML(c)}<div class="act">${actHTML(c)}${canReplyLater(c) ? laterHTML(c) : ""}</div></article>`;
+}
+
+function footHTML() {
+  const by = s => CARDS.filter(c => stOf(c) === s).length;
+  const n = CARDS.filter(c => DONE.includes(stOf(c))).length, inDeck = by("in"), skip = by("skip");
+  const posted = by("posted") + CARDS.filter(c => stOf(c) === "in" && hasReply(c)).length;
+  /* In a live round, Reset only clears what you've typed. Once anything has gone to Claude it could leave changes in the deck the page no longer knows about, so it goes away. */
+  const reset = LIVE && SENT ? "" : `<button type="button" class="link quiet" id="reset">Reset</button>`;
+  const all = n === CARDS.length;
+  /* The end of the round says what happened, then sends you to the deck to see it */
+  const sum = [
+    inDeck && `<li><b>${inDeck}</b> ${inDeck === 1 ? "change" : "changes"} in the deck</li>`,
+    posted && `<li><b>${posted}</b> ${posted === 1 ? "reply" : "replies"} posted to reviewers</li>`,
+    by("closed") && `<li><b>${by("closed")}</b> closed with no reply</li>`,
+    skip && `<li><b>${skip}</b> skipped</li>`].filter(Boolean).join("");
+  const open = DECK ? `<a class="btn primary go-deck" href="${esc(DECK)}" target="_blank" rel="noopener">Open the deck in Figma</a>`
+    : LIVE ? "" : `<p class="note">In a real run, this is where you open the deck in Figma and see the changes.</p>`;
+  return `<div class="seen"><div class="foot-row"><span aria-live="polite"><b>${n}</b> of ${CARDS.length} comments done</span>${reset}</div><div class="meter" aria-hidden="true"><i style="transform:scaleX(${n / CARDS.length})"></i></div></div>
+    ${all ? `<div class="done"><h2>Every comment has an answer.</h2><ul class="sum">${sum}</ul>${open}</div>` : ""}
+    ${OFF ? `<p class="tally warn" role="alert">${OFFWHY ? esc(OFFWHY) : "Can't reach Claude's review server. Is it still running? Your last change may not have gone through."}</p>` : ""}
+    ${LIVE ? "" : `<p class="tally">Demo: nothing is sent to Figma.</p>`}`;
+}
+const SPIN = `<span class="spin" aria-hidden="true"></span>`;
+/* While Claude works: what's happening, and a bar that keeps moving so the page never looks frozen */
+function renderSide() {
+  const body = document.getElementById("sideBody"), keep = body.scrollTop;
+  {
+    const s = STOPS[cur], cs = s.ids.map(byId), many = cs.length > 1, al = alsoFor(s);
+    document.getElementById("sideWhere").innerHTML = `<b>${esc(s.label)}</b> · ${cs.length} ${cs.length === 1 ? "comment" : "comments"}`;
+    body.innerHTML = cs.map(c => cmtHTML(c, cur, many)).join("")
+      + (al.length ? `<div class="also-on"><p class="label quiet">Also on this slide</p>${al.map(c => `<button type="button" class="link quiet" data-go="${stopOf(c.id)}">${esc(c.short || c.where)} · decided on ${esc(STOPS[stopOf(c.id)].label.toLowerCase())}</button>`).join("")}</div>` : "");
+  }
+  body.scrollTop = keep;
+  document.getElementById("sideFoot").innerHTML = footHTML();
+  renderNav();
+}
+/* The bits that follow the slide in view: counter, arrows, strip */
+function renderNav() {
+  document.getElementById("help").hidden = STOPS[cur].ids.length < 2;
+  document.getElementById("prev").disabled = cur === 0;
+  document.getElementById("next").disabled = cur === STOPS.length - 1;
+  /* "Slide 4 of 19" counts the deck's slides, the way the deck owner thinks of them. The strip already shows the stops. */
+  document.getElementById("posW").textContent = STOPS[cur].label;
+  document.getElementById("posT").textContent = DATA.deck.slides ? ` of ${DATA.deck.slides}` : "";
+  document.getElementById("strip").innerHTML = stripHTML();
+  const chip = document.querySelector(`.chip[data-go="${cur}"]`);
+  if (chip) chip.scrollIntoView({ block: "nearest", inline: "nearest" });
+}
+
+/* ---------- moving between slides ---------- */
+const scroller = document.getElementById("scroller");
+function markSeen(i) { let ch = false; STOPS[i].ids.forEach(id => { if (!S.seen.includes(id)) { S.seen.push(id); ch = true; } }); if (ch) save(); }
+function setCur(i) {
+  if (i === cur) return;
+  cur = i; mode = null; editing = null; markSeen(i);
+  document.getElementById("sideBody").scrollTop = 0;
+  renderSide();
+}
+function go(i) {
+  i = Math.max(0, Math.min(STOPS.length - 1, i));
+  document.getElementById("st" + i).scrollIntoView({ block: "start" });
+}
+function build() {
+  scroller.innerHTML = STOPS.map((s, i) => `<section class="stop" id="st${i}" data-i="${i}" aria-label="${esc(s.label)}">${stageHTML(activeOf(i))}</section>`).join("");
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) setCur(+e.target.dataset.i); }), { root: scroller, threshold: 0.6 });
+  scroller.querySelectorAll(".stop").forEach(s => io.observe(s));
+  setCur(0);
+  setOutlines(outlines);
+}
+
+/* ---------- talking to Claude (only when served by scripts/serve.py) ---------- */
+let LIVE = false;
+async function init() {
+  try { DATA = await (await fetch("data.json", { cache: "no-store" })).json(); }
+  catch (e) {
+    document.getElementById("sideBody").innerHTML = `<p class="note">Couldn't load data.json. Open this page through a local web server (for example the Blueline server), not straight from the file.</p>`;
+    return;
+  }
+  DECK = DATA.deck.url || ""; PEOPLE = DATA.people || {}; HL = DATA.highlights || {}; CARDS = DATA.cards || [];
+  KEY = `blueline:${location.pathname}:${DECK || DATA.deck.title}:${DATA.deck.round || ""}`;
+  loadState();
+  dropStale();
+  Object.values(S.cards).forEach(d => { d.st = { applying: "queued", posting: "queued", revising: "back", undoing: "undo", unposting: "undo" }[d.st] || d.st; });
+  Object.keys(S.later || {}).forEach(k => { S.later[k] = laterOf({ id: k }).filter(x => x.st !== "removing"); });
+  document.title = `${DATA.deck.title} · Blueline`;
+  document.getElementById("deckTitle").textContent = DATA.deck.title;
+  const link = document.getElementById("deckLink");
+  /* With no deck link (the public demo) the button still shows, but goes nowhere */
+  if (DECK) link.href = DECK; else { link.removeAttribute("target"); link.addEventListener("click", e => e.preventDefault()); }
+  group();
+  /* A static demo (data.json says "demo": true) has no server to ask, so it doesn't try */
+  if (!DATA.demo) try { const r = await fetch("api/status", { cache: "no-store" }); if (r.ok) { LIVE = true; fromServer(await r.json()); } } catch (e) {}
+  build();
+  if (LIVE) setInterval(poll, 600);
+}
+
+/* ---------- live: each decision goes to Claude the moment you make it ---------- */
+/* The server records what you decide (acts) and hands back how Claude is getting on (progress).
+   Every open copy of this page polls, so two windows never disagree. */
+let OFF = false, OFFWHY = "", SENT = false, inflight = 0;
+const LATER = {};                 // card id -> later replies, from the server
+const UNSENT = {};                // card id -> why its last decision didn't reach the server
+async function send(c, body) {
+  inflight++;
+  let why = null, n = null;
+  try {
+    const r = await fetch("api/act", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.assign({ id: c.id }, body)) });
+    const res = await r.json().catch(() => ({}));
+    if (r.ok) n = res.n; else why = res.error || `the review server said ${r.status}`;
+  } catch (e) { why = "Claude's review server didn't answer. Is it still running?"; }
+  inflight--;
+  if (why == null) { OFF = false; SENT = true; delete UNSENT[c.id]; poll(); return n; }
+  /* Nothing was recorded, so nothing will happen: put the card back the way the server has it, and say why */
+  UNSENT[c.id] = why;
+  if (!/didn't answer/.test(why)) OFF = false; else OFF = true;
+  lastSeen = "";
+  if (LASTST) fromServer(LASTST);
+  if (cur >= 0 && stopOf(c.id) === cur && !mode && !editing) show(c.id);   // back to the comment that didn't go, if it's on this slide
+  else keepFocus(refresh);
+  poll();
+  return null;
+}
+async function poll() {
+  if (inflight) return;           // a decision is on its way; don't let an older answer undo it on screen
+  let why = "";
+  try {
+    const r = await fetch("api/status", { cache: "no-store" });
+    if (!r.ok) { why = (await r.json().catch(() => ({}))).error || ""; throw new Error(String(r.status)); }
+    const st = await r.json();
+    if (OFF) { OFF = false; OFFWHY = ""; keepFocus(refresh); }
+    if (!inflight) fromServer(st);
+  } catch (e) {
+    /* say it once, and again only if the reason changes (a damaged acts.json says which file) */
+    if (!OFF || why !== OFFWHY) { OFF = true; OFFWHY = why; keepFocus(refresh); }
+  }
+}
+/* Re-render without losing your place in a text field you're typing in */
+function keepFocus(fn) {
+  const a = document.activeElement, isT = a && a.tagName === "TEXTAREA";
+  const sel = !isT ? null : a.dataset.live ? `textarea[data-live="${a.dataset.live}"]` : a.dataset.later != null ? `textarea[data-later="${a.dataset.later}"]` : a.id ? "#" + CSS.escape(a.id) : null;
+  const pos = sel && [a.selectionStart, a.selectionEnd], val = sel && a.value;
+  fn();
+  const t = sel && document.querySelector(sel);
+  if (t) { if (t.value !== val) t.value = val; t.focus(); t.setSelectionRange(pos[0], pos[1]); }
+}
+let lastSeen = "";
+let LASTST = null;                // the server's last answer, to put a card back if a decision doesn't get through
+function fromServer(st) {
+  LASTST = st;
+  const A = (st.acts || {}).cards || {}, P = (st.progress || {}).cards || {};
+  const key = JSON.stringify([st.acts, st.progress]);
+  if (key === lastSeen) return;
+  lastSeen = key;
+  SENT = Object.keys(A).length > 0 || ((st.acts || {}).later || []).length > 0;
+  let reload = false;
+  CARDS.forEach(c => {
+    const a = A[c.id], mine = a && P[c.id] && P[c.id].n === a.n ? P[c.id] : null, old = S.cards[c.id];
+    let d;
+    if (!a || a.act === "reopen") d = null;
+    else if (a.act === "skip") d = { st: "skip" };
+    else if (a.act === "close") d = { st: "closed" };
+    else if (a.act === "approve") d = mine ? { st: mine.st, t: a.n, why: mine.why } : { st: "queued", t: a.n };
+    else if (a.act === "back") {
+      d = !mine ? { st: "back", t: a.n, note: a.note } : mine.st === "open" ? { st: "open", revised: a.n, note: a.note } : { st: mine.st, t: a.n, note: a.note };
+      if (d.revised && (!old || old.revised !== a.n)) reload = true;   // Claude redid it: fetch the new preview and wording
+    }
+    else if (a.act === "undo") d = !mine ? { st: "undo", t: a.n } : mine.st === "open" ? null : mine.st === "failed" ? { st: "in", t: a.n, why: `Couldn't take it out: ${mine.why || "Claude will say why."}` } : { st: mine.st, t: a.n, why: mine.why };
+    if (d) S.cards[c.id] = d; else delete S.cards[c.id];
+    /* An approved card shows the wording, reply and pick that were sent, in every window, whatever this one had saved */
+    if (a && a.act === "approve") {
+      if (c.edit && Array.isArray(a.edit) && a.edit.length === c.edit.length) {
+        if (a.edit.every((x, k) => x === c.edit[k].after)) delete S.edits[c.id]; else S.edits[c.id] = a.edit.slice();
+      }
+      if (typeof a.reply === "string") setReply(c, a.reply);
+      if (c.kind === "pick" && a.pick) S.picks[c.id] = a.pick;
+      noteBase(c);
+    }
+  });
+  const PL = (st.progress || {}).later || {};
+  Object.keys(LATER).forEach(k => delete LATER[k]);
+  /* A later reply you pressed Undo on: "removing" until it's out of the thread, then gone. If it couldn't come out, it stays posted and says why. */
+  const PU = (st.progress || {}).unlater || {}, un = {};
+  ((st.acts || {}).unlater || []).forEach(u => { un[u.of] = PU[u.n] || { st: "pending" }; });
+  ((st.acts || {}).later || []).forEach(x => {
+    const p = PL[x.n] || {}, u = un[x.n];
+    if (p.st === "removed") return;
+    const e = { n: x.n, text: x.text, st: p.st || "posting", why: p.why };
+    if (u && u.st === "failed") e.why = `Couldn't take it out: ${u.why || "Claude will say why."}`;
+    else if (u && p.st === "posted") e.st = "removing";
+    (LATER[x.id] ||= []).push(e);
+  });
+  const PD = (st.progress || {}).drafts || {}, lastDraft = {};
+  ((st.acts || {}).drafts || []).forEach(x => { lastDraft[`${x.id}:${x.for}`] = x.n; });
+  ((st.acts || {}).drafts || []).forEach(x => {
+    const k = `${x.id}:${x.for}`, text = (PD[x.n] || {}).text, c = byId(x.id);
+    if (!text || !c || S.usedDrafts.includes(x.n)) return;
+    /* After a reload this window no longer knows it asked: the newest draft still lands, if its box is empty */
+    const orphan = !drafting.has(k) && lastDraft[k] === x.n && (x.for === "later" ? !(laterDraft.get(c.id) || "").trim() : isOpen(c) && !hasReply(c));
+    if (drafting.get(k) !== x.n && !orphan) return;
+    drafting.delete(k); S.usedDrafts.push(x.n);
+    if (x.for === "later") laterDraft.set(c.id, text);
+    else { genText.set(c.id, text); S.replies[c.id] = text; replyOpen.add(c.id); }
+  });
+  save();
+  if (cur < 0) return;            // first load: build() draws everything next
+  if (reload) reloadCards(); else keepFocus(refresh);
+}
+/* After Claude redoes a card it rewrites data.json and adds new images; take them in without a page reload */
+async function reloadCards() {
+  try {
+    const d = await (await fetch("data.json", { cache: "no-store" })).json();
+    DATA = d; HL = d.highlights || {}; CARDS = d.cards || [];
+    dropStale();
+    save();
+    STOPS.forEach((_, i) => renderStop(i));
+    keepFocus(refresh);
+  } catch (e) { keepFocus(refresh); }
+}
+
+/* ---------- demo: with no server, Claude's side is acted out on a timer ---------- */
+let busy = false, gen = 0;
+function refresh() { if (mode || editing) { document.getElementById("sideFoot").innerHTML = footHTML(); renderNav(); } else renderSide(); }
+function tick() {
+  if (busy || LIVE) return;
+  const q = CARDS.filter(c => ["queued", "back", "undo"].includes(stOf(c))).sort((a, b) => S.cards[a.id].t - S.cards[b.id].t)[0];
+  if (!q) return;
+  busy = true;
+  const g = gen, d = S.cards[q.id];
+  const later = (ms, f) => setTimeout(() => { if (g === gen) f(); }, ms);
+  const set = s => { S.cards[q.id] = Object.assign({}, S.cards[q.id], { st: s }); save(); refresh(); };
+  const done = () => { busy = false; tick(); };
+  if (d.st === "queued" && q.kind === "reply" && !hasReply(q)) { set("closed"); done(); }
+  else if (d.st === "queued" && q.kind === "reply") { set("posting"); later(1600, () => { set("posted"); done(); }); }
+  else if (d.st === "queued") { set("applying"); later(3200, () => { if (hasReply(q)) { set("posting"); later(1400, () => { set("in"); done(); }); } else { set("in"); done(); } }); }
+  else if (d.st === "back") { set("revising"); later(4000, () => { S.cards[q.id] = { st: "open", revised: true, note: d.note }; save(); refresh(); done(); }); }
+  else if (d.st === "undo") {
+    const reopen = () => { delete S.cards[q.id]; save(); refresh(); done(); };
+    const down = () => { set("unposting"); later(1500, reopen); };
+    if (d.from === "posted") down();
+    else { set("undoing"); later(2200, () => hasReply(q) ? down() : reopen()); }
+  }
+}
+/* After a decision, move to the next comment that still needs one: on this slide first, then the slides after it */
+function advance() {
+  if (mode || editing) return;
+  const here = STOPS[cur].ids.find(id => isOpen(byId(id)));
+  if (here) { if (activeOf(cur).id !== here) show(here); return; }
+  for (let k = 1; k < STOPS.length; k++) {
+    const i = (cur + k) % STOPS.length, id = STOPS[i].ids.find(x => isOpen(byId(x)));
+    if (id) { if (activeOf(i).id !== id) { active[i] = id; renderStop(i); } go(i); return; }
+  }
+}
+init().then(tick);
+
+document.getElementById("prev").addEventListener("click", () => go(cur - 1));
+document.getElementById("next").addEventListener("click", () => go(cur + 1));
+document.addEventListener("keydown", e => {
+  if (e.target.dataset && e.target.dataset.live) {
+    const [id, j] = e.target.dataset.live.split(":");
+    if (j === "r" && e.key === "Escape" && !e.target.value.trim()) { const c = byId(id); setReply(c, ""); replyOpen.delete(c.id); save(); renderSide(); }
+    return;
+  }
+  if (e.target.dataset && e.target.dataset.later != null) {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); postLater(byId(e.target.dataset.later)); }
+    else if (e.key === "Escape") { laterDraft.delete(+e.target.dataset.later); laterOpen.delete(+e.target.dataset.later); renderSide(); }
+    return;
+  }
+  if (e.target.closest && e.target.closest("textarea")) {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { const b = e.target.closest(".box")?.querySelector('[data-act="send"]'); b && b.click(); }
+    if (e.key === "Escape" && mode) { mode = null; renderSide(); }
+    return;
+  }
+  if (e.key === "Escape" && cur >= 0) { const c = activeOf(cur); if (zoom[c.id] != null) { unzoom(c.id); return; } }
+  const pk = e.target.closest && e.target.closest(".pillsw");
+  if (pk && (e.key === "ArrowLeft" || e.key === "ArrowRight")) { e.preventDefault(); setNow(pillStage(pk), e.key === "ArrowLeft"); pk.querySelector('[aria-checked="true"]').focus(); return; }
+  if (["ArrowDown", "PageDown", "j"].includes(e.key)) { e.preventDefault(); go(cur + 1); }
+  else if (["ArrowUp", "PageUp", "k"].includes(e.key)) { e.preventDefault(); go(cur - 1); }
+});
+
+/* Click the slide to see it as it is now; click again for the change. Space or Enter does the same from the keyboard. */
+function setNow(s, on) {
+  s.classList.toggle("is-now", on); s.setAttribute("aria-pressed", on);
+  const w = s.closest(".stop-in"); if (!w) return;
+  w.classList.toggle("is-now", on);
+  w.querySelectorAll(".pillsw [data-side]").forEach(b => { const me = (b.dataset.side === "now") === on; b.setAttribute("aria-checked", me); b.tabIndex = me ? 0 : -1; });
+}
+/* The Before / After pill: tap a side, tap the pill to flip, or drag the knob and let go */
+let pd = null;
+const pillPos = (d, x) => { const r = d.getBoundingClientRect(), k = (r.width - 6) / 2; return Math.min(1, Math.max(0, (x - r.left - 3 - k / 2) / k)); };
+const pillStage = d => d.closest(".stop-in").querySelector("[data-stage]");
+document.addEventListener("pointerdown", e => { const d = e.target.closest(".pillsw"); if (!d || e.button) return; pd = { d, x: e.clientX, moved: false }; d.setPointerCapture(e.pointerId); });
+document.addEventListener("pointermove", e => { if (!pd) return; if (Math.abs(e.clientX - pd.x) > 4) pd.moved = true; if (pd.moved) { pd.d.classList.add("dragging"); pd.d.style.setProperty("--p", pillPos(pd.d, e.clientX)); } });
+document.addEventListener("pointerup", e => { if (!pd) return; const { d, moved } = pd; pd = null; if (!moved) return;
+  d._dragged = true; d.classList.remove("dragging"); d.style.removeProperty("--p"); setNow(pillStage(d), pillPos(d, e.clientX) < .5); });
+document.addEventListener("pointercancel", () => { if (pd) { pd.d.classList.remove("dragging"); pd.d.style.removeProperty("--p"); pd = null; } });
+
+function show(id) {
+  active[cur] = +id; renderStop(cur); renderSide();
+  const open = document.querySelector(`#sideBody .cmt[data-sel="${+id}"]`);   /* bring the comment you just opened into view */
+  if (open) open.scrollIntoView({ block: "nearest", behavior: calm() ? "auto" : "smooth" });
+}
+document.addEventListener("click", e => {
+  const p = e.target.closest(".pillsw");
+  if (p) { if (p._dragged) { p._dragged = false; return; } const b = e.target.closest("[data-side]"), st = pillStage(p); setNow(st, b ? b.dataset.side === "now" : !st.classList.contains("is-now")); return; }
+  const zi = e.target.closest("[data-zoom]");
+  if (zi) { const [id, n] = zi.dataset.zoom.split(":"); zoomTo(id, +n); return; }
+  const zo = e.target.closest("[data-unzoom]");
+  if (zo) { unzoom(zo.dataset.unzoom); return; }
+  const pin = e.target.closest("[data-pin]");
+  if (pin) {   /* a pin opens its comment; one decided on another slide takes you to that slide */
+    const id = +pin.dataset.pin, i = stopOf(id);
+    if (i === cur) show(id); else { active[i] = id; renderStop(i); go(i); }
+    return;
+  }
+  const s = e.target.closest("[data-stage]");
+  if (s) { setNow(s, !s.classList.contains("is-now")); return; }
+  const g = e.target.closest("[data-go]");
+  if (g) { go(+g.dataset.go); return; }
+  const th = e.target.closest("[data-shot]");
+  if (th) { const [id, j] = th.dataset.shot.split(":"); shotIdx[id] = +j; renderStop(stopOf(id)); return; }
+  if (e.target.closest("[data-outlines]")) { setOutlines(!outlines); return; }
+  const sh = e.target.closest("[data-show]");
+  if (sh) { show(sh.dataset.show); return; }
+  const op = e.target.closest("[data-pick]");
+  if (op) { const c = byId(op.dataset.id); if (!isOpen(c)) return; delete zoom[c.id]; S.picks[c.id] = op.dataset.pick; save(); active[cur] = c.id; renderStop(cur); renderSide(); return; }
+  const a = e.target.closest("[data-act]");
+  if (a) {
+    const act = a.dataset.act, c = byId(a.dataset.id);
+    if (STOPS[cur].ids.length > 1 && activeOf(cur).id !== c.id) { active[cur] = c.id; renderStop(cur); }
+    /* Focus the note box itself: the card's new wording is a text field too, and a note typed there would go into the deck */
+    if (act === "nq") { mode = { id: c.id, kind: act }; renderSide(); const t = document.getElementById("nq-" + c.id); if (t) t.focus(); }
+    else if (act === "cancel") { mode = null; renderSide(); }
+    else if (act === "send") {
+      const t = document.getElementById("nq-" + c.id), note = t.value.trim();
+      if (!note) { t.focus(); t.placeholder = "Say what's off so Claude can fix it"; return; }
+      S.cards[c.id] = { st: "back", note, t: Date.now() }; mode = null; save(); renderSide(); tick(); setTimeout(advance, 700);
+      if (LIVE) send(c, { act: "back", note });
+    }
+    else if (act === "approve") {   /* stays on this slide so you can watch it go in */
+      const close = c.kind === "reply" && !hasReply(c);   // a reply-only comment with the reply deleted: nothing to post
+      S.cards[c.id] = close && LIVE ? { st: "closed" } : { st: "queued", t: Date.now() }; mode = null; editing = null; save(); renderSide(); tick();
+      if (LIVE) send(c, close ? { act: "close" } : { act: "approve", edit: (c.edit || []).map((_, j) => lineText(c, j)),
+        pick: c.kind === "pick" ? pickOf(c) : "", reply: hasReply(c) ? replyOf(c).trim() : "" });
+      /* One by one: the next comment on this slide that still needs you opens. The slide itself stays put. */
+      const at = cur;
+      setTimeout(() => { if (cur !== at || mode || UNSENT[c.id]) return; const next = STOPS[at].ids.find(id => id !== c.id && isOpen(byId(id))); if (next && activeOf(at).id === c.id) show(next); }, 700);
+    }
+    else if (act === "skip") { S.cards[c.id] = { st: "skip" }; mode = null; save(); renderSide(); setTimeout(advance, 700); if (LIVE) send(c, { act: "skip" }); }
+    else if (act === "undo") {
+      const was = stOf(c);
+      /* In the deck or posted: Claude takes the change out and the reply down. Skipped or closed: it just reopens. */
+      const back = was === "in" || was === "posted";
+      if (back) { S.cards[c.id] = { st: "undo", t: Date.now(), from: was }; tick(); } else delete S.cards[c.id];
+      save(); renderSide();
+      if (LIVE) send(c, { act: back ? "undo" : "reopen" });
+    }
+    else if (act === "postlater") postLater(c);
+    else if (act === "unlater") unLater(c, +a.dataset.n);
+    else if (act === "genlater" || act === "genreply") {
+      const kind = act === "genlater" ? "later" : "reply";
+      if (kind === "reply" && c.reply) {   /* Claude already wrote this card's reply (with its source): it goes straight in */
+        setReply(c, c.reply); genText.set(c.id, c.reply); replyOpen.add(c.id); save(); renderSide(); focusReply(c);
+      } else if (LIVE) {   /* Claude writes it; the text lands in the box when it's ready */
+        drafting.set(`${c.id}:${kind}`, -1); renderSide();
+        send(c, { act: "draft", for: kind }).then(n => { if (n == null) drafting.delete(`${c.id}:${kind}`); else if (drafting.get(`${c.id}:${kind}`) === -1) drafting.set(`${c.id}:${kind}`, n); lastSeen = ""; poll(); keepFocus(refresh); });
+      } else {
+        a.disabled = true; a.textContent = "Drafting…"; a.classList.add("busy");
+        if (kind === "later") setTimeout(() => { laterDraft.set(c.id, c.reply && !hasReply(c) ? c.reply : standIn(c)); renderSide(); focusLater(c); }, 900);
+        else setTimeout(() => { const t = standIn(c); genText.set(c.id, t); setReply(c, t); replyOpen.add(c.id); save(); renderSide(); focusReply(c); }, 900);
+      }
+    }
+    else if (act === "delreply") { setReply(c, ""); genText.delete(c.id); replyOpen.delete(c.id); save(); renderSide(); }
+    else if (act === "openlater") { laterOpen.add(c.id); renderSide(); focusLater(c); }
+    else if (act === "closelater") { laterDraft.delete(c.id); laterOpen.delete(c.id); renderSide(); }
+    else if (act === "addreply") { replyOpen.add(c.id); renderSide(); focusReply(c); }
+    else if (act === "revert") { if (!isOpen(c)) return; if (c.kind === "reply") delete S.replies[c.id]; else { delete S.edits[c.id]; renderStop(stopOf(c.id)); } save(); renderSide(); }
+    return;
+  }
+  /* Clicking anywhere else on a comment (in a slide with several) puts its change on the big slide */
+  const sel = e.target.closest("[data-sel]");
+  if (sel && !e.target.closest("button, a, summary, textarea") && activeOf(cur).id !== +sel.dataset.sel) { show(sel.dataset.sel); return; }
+  if (e.target.id === "reset") {
+    if (LIVE) fetch("api/reset", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {});
+    S = fresh(); dropStale(); save(); mode = null; gen++; busy = false;
+    Object.keys(UNSENT).forEach(k => delete UNSENT[k]);
+    [active, shotIdx, zoom, LATER].forEach(o => Object.keys(o).forEach(k => delete o[k]));
+    [replyOpen, genText, laterDraft, laterOpen, whyOpened, drafting].forEach(s => s.clear()); editing = null; lastSeen = "";
+    STOPS.forEach((_, i) => renderStop(i)); scroller.scrollTop = 0; markSeen(0); renderSide();
+  }
+});
+document.addEventListener("input", e => {
+  if (e.target.dataset && e.target.dataset.later != null) {
+    const c = byId(e.target.dataset.later), v = e.target.value, box = e.target.closest(".rb-field");
+    laterDraft.set(c.id, v);
+    if (box && box.classList.contains("empty") === !!v.trim()) { const pos = e.target.selectionStart; renderSide(); const t = document.querySelector(`textarea[data-later="${c.id}"]`); if (t) { t.focus(); t.setSelectionRange(pos, pos); } }
+    return;
+  }
+  const lv = e.target.dataset && e.target.dataset.live;
+  if (lv) {
+    const [id, j] = lv.split(":"), c = byId(id), v = e.target.value;
+    if (j === "r") { setReply(c, v); const del = !!v.trim(), box = e.target.closest(".msg-body"); if (box && (!!box.querySelector(".icon-btn") !== del || !!box.querySelector(".gen") === del)) { const pos = e.target.selectionStart; renderSide(); const t = document.querySelector(`textarea[data-live="${c.id}:r"]`); if (t) { t.focus(); t.setSelectionRange(pos, pos); } } }
+    else {
+      const was = edited(c), arr = c.edit.map((x, k) => lineText(c, k)); arr[+j] = v;
+      if (arr.every((x, k) => x === c.edit[k].after)) delete S.edits[c.id]; else { S.edits[c.id] = arr; noteBase(c); }
+      /* The moment your wording differs from Claude's (or goes back to it), say so: "Your edit" in the panel, and a note
+         on the slide that the picture still shows Claude's version. Only redraw on that switch, not on every key. */
+      if (edited(c) !== was) { save(); keepFocus(() => { const i = stopOf(c.id); if (activeOf(i).id === c.id) renderStop(i); renderSide(); }); return; }
+    }
+    save();
+  }
+});
+
+/* Reply boxes grow with their text in every browser (field-sizing isn't everywhere yet), so there's never an inner scrollbar */
+function fit(t) { t.style.height = "auto"; t.style.height = t.scrollHeight + (t.offsetHeight - t.clientHeight) + "px"; }   /* add back only the border it actually has */
+document.addEventListener("input", e => { if (e.target.matches && e.target.matches("textarea.field, .rb-field textarea")) fit(e.target); });
+/* "Drafted by Claude" drops off the moment you change the wording, and comes back if you type it back to Claude's */
+document.addEventListener("input", e => { const k = e.target.dataset && e.target.dataset.live; if (!k || !k.endsWith(":r")) return; const sub = e.target.closest(".msg-body")?.querySelector(".msg-sub"); if (sub) sub.hidden = !byClaude(byId(k.split(":")[0])); });
+const fitAll = () => document.querySelectorAll("#sideBody textarea.field, #sideBody .rb-field textarea").forEach(fit);
+new MutationObserver(fitAll).observe(document.getElementById("sideBody"), { childList: true, subtree: true });
+new ResizeObserver(fitAll).observe(document.getElementById("sideBody"));   // the panel's width settles after fonts load
+if (document.fonts) document.fonts.ready.then(fitAll);
+</script>
+</body>
+</html>

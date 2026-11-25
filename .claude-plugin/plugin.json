@@ -1,0 +1,6 @@
+{
+  "name": "blueline",
+  "version": "0.1.0",
+  "description": "Reviewer comments on a Figma Slides deck in, approved changes out. Claude drafts a fix or reply for every comment, you review them on one page, and approved changes are applied in Figma.",
+  "keywords": ["figma", "slides", "review", "comments", "feedback"]
+}

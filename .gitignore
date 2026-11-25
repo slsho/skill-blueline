@@ -1,0 +1,10 @@
+# secrets
+.env
+.env.*
+!.env.example
+# review rounds hold real comments and decisions
+blueline-review/
+# local clutter
+.DS_Store
+__pycache__/
+*.tmp
